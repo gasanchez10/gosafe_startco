@@ -1271,7 +1271,7 @@
       </div>
 
       <div class="reason" style="margin-top:16px;border-left-color:var(--accent);">
-        <strong>Enviar desde el sitio desplegado</strong> (mismo dominio Railway): el servidor expone <code>POST /api/send-outreach</code>. La API key de MailerLite <strong>nunca</strong> va al navegador; solo quien tenga el <code>OUTREACH_API_SECRET</code> configurado en Railway puede disparar.
+        <strong>Enviar desde el sitio desplegado</strong> (mismo dominio Railway): el servidor expone <code>POST /api/send-outreach</code>. La API key de MailerLite <strong>nunca</strong> va al navegador; solo quien tenga el <code>OUTREACH_API_SECRET</code> configurado en Railway puede disparar. Si el envío falla diciendo que falta esa variable: cr&eacute;ala en Railway &rarr; Variables, redeploy, y usa el mismo valor en el campo token.
       </div>
       <div style="margin-top:14px;display:grid;gap:10px;max-width:520px;">
         <label style="font-size:11px;color:var(--text-muted);">Email del contacto</label>
@@ -1295,6 +1295,10 @@
         <h2>Outreach un clic &mdash; lista mundial</h2>
         <div class="section-subtitle">Un solo botón: misma plantilla HTML con <code>{$name}</code> por destinatario (MailerLite). Se crea un grupo nuevo solo para este envío y una campaña programada al instante.</div>
       </div>
+    </div>
+
+    <div class="gosafe-summary" style="margin-bottom:16px;border-left:4px solid var(--accent);padding:12px 14px;background:rgba(200,255,0,0.06);">
+      <strong>Si el botón responde que falta <code>OUTREACH_API_SECRET</code>:</strong> en <strong>Railway</strong> entra a tu proyecto &rarr; el servicio Node &rarr; <strong>Variables</strong> &rarr; <em>New variable</em> &rarr; nombre <code>OUTREACH_API_SECRET</code>, valor un string largo (en terminal: <code>openssl rand -hex 32</code>) &rarr; guarda &rarr; <strong>Redeploy</strong> del servicio. El <strong>mismo</strong> valor pégalo en el campo <em>Token equipo</em> abajo. En local, define la misma variable en <code>.env</code> y arranca con <code>node --env-file=.env server.mjs</code>.
     </div>
 
     <div class="card" style="max-width:720px;">

@@ -26,6 +26,13 @@ const GROUP_NAME =
   process.env.MAILERLITE_GROUP_NAME?.trim() ||
   "GoSafe VC Outreach (Startco 2026)";
 
+const MSG_MISSING_OUTREACH_SECRET =
+  "El servidor no tiene OUTREACH_API_SECRET. En Railway: proyecto → tu servicio → Variables → New variable: OUTREACH_API_SECRET = (string largo aleatorio; en Mac/Linux: openssl rand -hex 32) → guardar → Redeploy. Luego pega el mismo valor en el campo token del dashboard.";
+const MSG_FORBIDDEN_SECRET =
+  "El token no coincide con OUTREACH_API_SECRET del servidor (revisa copiar/pegar y espacios).";
+const MSG_MISSING_MAILERLITE =
+  "Falta MAILERLITE_API_KEY o MAILES_API_KEY en las variables del servidor.";
+
 function calendlyBaseForPreview() {
   const u = process.env.CALENDLY_URL?.trim() || "";
   if (u.startsWith("http://") || u.startsWith("https://")) return u;
@@ -184,14 +191,18 @@ async function handleSendOutreach(req, res) {
     json(res, 503, {
       ok: false,
       error: "missing_outreach_secret",
-      message: "Set OUTREACH_API_SECRET on Railway to enable sends.",
+      message: MSG_MISSING_OUTREACH_SECRET,
     });
     return;
   }
 
   const given = String(body.secret || "").trim();
   if (given !== serverSecret) {
-    json(res, 403, { ok: false, error: "forbidden" });
+    json(res, 403, {
+      ok: false,
+      error: "forbidden",
+      message: MSG_FORBIDDEN_SECRET,
+    });
     return;
   }
 
@@ -200,7 +211,7 @@ async function handleSendOutreach(req, res) {
     json(res, 503, {
       ok: false,
       error: "missing_mailerlite_key",
-      message: "Set MAILERLITE_API_KEY or MAILES_API_KEY on Railway.",
+      message: MSG_MISSING_MAILERLITE,
     });
     return;
   }
@@ -333,13 +344,17 @@ async function handleSendOutreachBatch(req, res) {
     json(res, 503, {
       ok: false,
       error: "missing_outreach_secret",
-      message: "Set OUTREACH_API_SECRET on Railway to enable sends.",
+      message: MSG_MISSING_OUTREACH_SECRET,
     });
     return;
   }
 
   if (String(body.secret || "").trim() !== serverSecret) {
-    json(res, 403, { ok: false, error: "forbidden" });
+    json(res, 403, {
+      ok: false,
+      error: "forbidden",
+      message: MSG_FORBIDDEN_SECRET,
+    });
     return;
   }
 
@@ -355,7 +370,7 @@ async function handleSendOutreachBatch(req, res) {
     json(res, 503, {
       ok: false,
       error: "missing_mailerlite_key",
-      message: "Set MAILERLITE_API_KEY or MAILES_API_KEY on Railway.",
+      message: MSG_MISSING_MAILERLITE,
     });
     return;
   }
