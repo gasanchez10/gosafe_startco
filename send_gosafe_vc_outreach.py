@@ -3,7 +3,10 @@
 """
 MailerLite: group, subscriber, HTML campaign (gosafe_vc_outreach_email.html), instant schedule.
 
-Env: MAILES_API_KEY or MAILERLITE_API_KEY; optional CALENDLY_URL, PUBLIC_BASE_URL (logo in email),
+Env: MAILES_API_KEY o MAILERLITE_API_KEY; optional CALENDLY_URL,
+     optional PUBLIC_BASE_URL (sin barra final; logo en /go-safe-logo.png),
+     optional OUTREACH_LOGO_URL o LOGO_URL (URL absoluta del PNG; prioridad sobre PUBLIC_BASE_URL).
+     Sin URL: se usa el PNG en GitHub raw (Gmail no muestra base64 en correo).
      MAILERLITE_GROUP_NAME,
      MAILERLITE_FROM_EMAIL, MAILERLITE_FROM_NAME.
 """
@@ -117,24 +120,20 @@ def upsert_subscriber(token: str, email: str, name: str, group_id: str) -> None:
         sys.exit(f"POST /subscribers failed: {code} {data}")
 
 
-def build_html(calendly_url: str) -> str:
-    import base64
+DEFAULT_OUTREACH_LOGO = (
+    "https://raw.githubusercontent.com/gasanchez10/gosafe_startco/main/go-safe-logo.png"
+)
 
+
+def build_html(calendly_url: str) -> str:
     raw = TEMPLATE.read_text(encoding="utf-8")
     raw = raw.replace("__CALENDLY_URL__", calendly_url.rstrip("/") + "/")
-    pub = os.environ.get("PUBLIC_BASE_URL", "").strip().rstrip("/")
-    if pub:
-        logo_src = f"{pub}/go-safe-logo.png"
+    explicit = (os.environ.get("OUTREACH_LOGO_URL") or os.environ.get("LOGO_URL") or "").strip()
+    if explicit:
+        logo_src = explicit
     else:
-        logo_path = ROOT / "go-safe-logo.png"
-        if not logo_path.is_file():
-            logo_path = ROOT / "Go Safe Logo.png"
-        if logo_path.is_file():
-            logo_src = "data:image/png;base64," + base64.b64encode(logo_path.read_bytes()).decode(
-                "ascii"
-            )
-        else:
-            logo_src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+        pub = os.environ.get("PUBLIC_BASE_URL", "").strip().rstrip("/")
+        logo_src = f"{pub}/go-safe-logo.png" if pub else DEFAULT_OUTREACH_LOGO
     return raw.replace("__LOGO_SRC__", logo_src)
 
 

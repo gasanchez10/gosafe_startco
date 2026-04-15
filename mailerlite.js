@@ -3,7 +3,6 @@
  */
 
 import fs from "node:fs";
-import path from "node:path";
 
 const BASE = "https://connect.mailerlite.com/api";
 
@@ -115,32 +114,27 @@ export async function scheduleCampaignInstant(token, campaignId) {
   });
 }
 
-function resolveLogoSrc(templatePath, publicBaseUrl) {
+/** Gmail and most clients block data:image/*;base64 in email HTML; always use https URL for logos. */
+const DEFAULT_OUTREACH_LOGO =
+  "https://raw.githubusercontent.com/gasanchez10/gosafe_startco/main/go-safe-logo.png";
+
+function resolveLogoSrc(publicBaseUrl) {
+  const explicit = (
+    process.env.OUTREACH_LOGO_URL ||
+    process.env.LOGO_URL ||
+    ""
+  ).trim();
+  if (explicit) return explicit;
   const pub = (publicBaseUrl || "").trim().replace(/\/+$/, "");
-  if (pub) {
-    return `${pub}/go-safe-logo.png`;
-  }
-  const dir = path.dirname(templatePath);
-  const candidates = [
-    path.join(dir, "go-safe-logo.png"),
-    path.join(dir, "Go Safe Logo.png"),
-  ];
-  for (const p of candidates) {
-    if (fs.existsSync(p)) {
-      const b64 = fs.readFileSync(p).toString("base64");
-      return `data:image/png;base64,${b64}`;
-    }
-  }
-  return "";
+  if (pub) return `${pub}/go-safe-logo.png`;
+  return DEFAULT_OUTREACH_LOGO;
 }
 
 export function buildOutreachHtml(templatePath, calendlyUrl, publicBaseUrl = "") {
   const raw = fs.readFileSync(templatePath, "utf8");
   const cal = (calendlyUrl || "https://calendly.com/").trim().replace(/\/+$/, "");
   let html = raw.replace(/__CALENDLY_URL__/g, `${cal}/`);
-  const logoSrc = resolveLogoSrc(templatePath, publicBaseUrl);
-  const logoFallback =
-    "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-  html = html.replace(/__LOGO_SRC__/g, logoSrc || logoFallback);
+  const logoSrc = resolveLogoSrc(publicBaseUrl);
+  html = html.replace(/__LOGO_SRC__/g, logoSrc);
   return html;
 }
