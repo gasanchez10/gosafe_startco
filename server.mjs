@@ -27,7 +27,7 @@ const GROUP_NAME =
   "GoSafe VC Outreach (Startco 2026)";
 
 const MSG_MISSING_OUTREACH_SECRET =
-  "El proceso Node no ve OUTREACH_API_SECRET ni MAILES_API_KEY. En Railway: las variables deben estar en la pestaña Variables del MISMO servicio que ejecuta este contenedor. Si las creaste en Project Settings → Shared Variables, NO entran solas: en el servicio → Variables → «Shared Variable» (o añade OUTREACH_API_SECRET=${{shared.OUTREACH_API_SECRET}}). Tras editar variables, Railway puede dejar «cambios pendientes»: revísalos y despliégalos; luego redeploy del servicio. /api/outreach-status";
+  "El proceso Node no ve OUTREACH_API_SECRET (o alias OUTREACH_SECRET) ni MAILES_API_KEY / MAILERLITE_API_KEY. En Railway: pestaña Variables del MISMO servicio que ejecuta este contenedor. Shared Variables del proyecto no entran solas: enlázalas (Shared Variable) o define las claves directamente en el servicio. Despliega «staged changes» y redeploy. Diagnóstico: GET /api/outreach-status?hints=1 (solo nombres de variables, sin valores).";
 const MSG_EMPTY_OUTREACH_SECRET =
   "OUTREACH_API_SECRET existe pero el valor está vacío o solo espacios. En Railway edita la variable: pega el secreto sin comillas ni saltos de línea al inicio/final. Redeploy. Diagnóstico: /api/outreach-status.";
 const MSG_FORBIDDEN_SECRET =
@@ -37,7 +37,8 @@ const MSG_MISSING_MAILERLITE =
 
 /** @returns {{ state: "ok"|"empty"|"missing"; value: string }} */
 function getOutreachSecretFromEnv() {
-  const raw = process.env.OUTREACH_API_SECRET;
+  const raw =
+    process.env.OUTREACH_API_SECRET ?? process.env.OUTREACH_SECRET;
   if (raw === undefined) {
     return { state: "missing", value: "" };
   }
@@ -455,10 +456,31 @@ async function handleSendOutreachBatch(req, res) {
   }
 }
 
+function envKeyHints() {
+  return Object.keys(process.env)
+    .filter((k) => {
+      const up = k.toUpperCase();
+      return (
+        up.includes("OUTREACH") ||
+        up.includes("MAILERLITE") ||
+        up.includes("MAILES") ||
+        up.includes("CALENDLY")
+      );
+    })
+    .sort();
+}
+
 function handleOutreachStatusGet(req, res) {
   if (req.method !== "GET") {
     json(res, 405, { ok: false, error: "method_not_allowed" });
     return;
+  }
+  let hints = false;
+  try {
+    const u = new URL(req.url || "/", "http://localhost");
+    hints = u.searchParams.get("hints") === "1";
+  } catch {
+    hints = false;
   }
   const sec = getOutreachSecretFromEnv();
   const ml = !!getMailerLiteToken();
@@ -476,14 +498,21 @@ function handleOutreachStatusGet(req, res) {
   } else {
     message = "OUTREACH_API_SECRET configurada (valor no vacío).";
   }
-  json(res, 200, {
+  const payload = {
     ok: true,
     /** Si false, suele ser servidor local sin --env-file=.env o no es el contenedor de Railway. */
     railwayRuntimeDetected: onRailway,
     outreachSecret: sec.state,
     mailerliteKey: ml ? "ok" : "missing",
     message,
-  });
+  };
+  if (hints) {
+    /** Nombres solamente (sin valores). Vacío = ninguna clave relacionada en este proceso. */
+    payload.matchingEnvKeyNames = envKeyHints();
+    payload.hintsNote =
+      "Si matchingEnvKeyNames está vacío, este contenedor no tiene ninguna variable cuyo nombre contenga OUTREACH, MAILERLITE, MAILES o CALENDLY. Añádelas en el servicio correcto de Railway (no solo Shared sin enlace).";
+  }
+  json(res, 200, payload);
 }
 
 const server = http.createServer(async (req, res) => {

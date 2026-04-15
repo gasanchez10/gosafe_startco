@@ -40,6 +40,7 @@ export function getMailerLiteToken() {
   return (
     process.env.MAILERLITE_API_KEY ||
     process.env.MAILES_API_KEY ||
+    process.env.MAILERLITE_TOKEN ||
     ""
   ).trim();
 }
