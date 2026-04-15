@@ -27,11 +27,26 @@ const GROUP_NAME =
   "GoSafe VC Outreach (Startco 2026)";
 
 const MSG_MISSING_OUTREACH_SECRET =
-  "El servidor no tiene OUTREACH_API_SECRET. En Railway: proyecto → tu servicio → Variables → New variable: OUTREACH_API_SECRET = (string largo aleatorio; en Mac/Linux: openssl rand -hex 32) → guardar → Redeploy. Luego pega el mismo valor en el campo token del dashboard.";
+  "El proceso Node no ve la variable OUTREACH_API_SECRET (no está definida en este servicio). Revisa: (1) el nombre exacto OUTREACH_API_SECRET; (2) la variable está en el mismo servicio de Railway que despliega este contenedor (si tienes varios servicios, cada uno tiene sus variables); (3) Redeploy después de guardar. Diagnóstico: abre en el navegador /api/outreach-status en este mismo dominio.";
+const MSG_EMPTY_OUTREACH_SECRET =
+  "OUTREACH_API_SECRET existe pero el valor está vacío o solo espacios. En Railway edita la variable: pega el secreto sin comillas ni saltos de línea al inicio/final. Redeploy. Diagnóstico: /api/outreach-status.";
 const MSG_FORBIDDEN_SECRET =
   "El token no coincide con OUTREACH_API_SECRET del servidor (revisa copiar/pegar y espacios).";
 const MSG_MISSING_MAILERLITE =
   "Falta MAILERLITE_API_KEY o MAILES_API_KEY en las variables del servidor.";
+
+/** @returns {{ state: "ok"|"empty"|"missing"; value: string }} */
+function getOutreachSecretFromEnv() {
+  const raw = process.env.OUTREACH_API_SECRET;
+  if (raw === undefined) {
+    return { state: "missing", value: "" };
+  }
+  const value = String(raw).trim();
+  if (!value) {
+    return { state: "empty", value: "" };
+  }
+  return { state: "ok", value };
+}
 
 function calendlyBaseForPreview() {
   const u = process.env.CALENDLY_URL?.trim() || "";
@@ -172,8 +187,6 @@ async function handleSendOutreach(req, res) {
     return;
   }
 
-  const serverSecret = process.env.OUTREACH_API_SECRET?.trim();
-
   let body;
   try {
     body = await readJsonBody(req);
@@ -187,14 +200,20 @@ async function handleSendOutreach(req, res) {
     return;
   }
 
-  if (!serverSecret) {
+  const secEnv = getOutreachSecretFromEnv();
+  if (secEnv.state !== "ok") {
     json(res, 503, {
       ok: false,
-      error: "missing_outreach_secret",
-      message: MSG_MISSING_OUTREACH_SECRET,
+      error:
+        secEnv.state === "empty" ? "empty_outreach_secret" : "missing_outreach_secret",
+      message:
+        secEnv.state === "empty"
+          ? MSG_EMPTY_OUTREACH_SECRET
+          : MSG_MISSING_OUTREACH_SECRET,
     });
     return;
   }
+  const serverSecret = secEnv.value;
 
   const given = String(body.secret || "").trim();
   if (given !== serverSecret) {
@@ -339,15 +358,22 @@ async function handleSendOutreachBatch(req, res) {
     return;
   }
 
-  const serverSecret = process.env.OUTREACH_API_SECRET?.trim();
-  if (!serverSecret) {
+  const secEnvBatch = getOutreachSecretFromEnv();
+  if (secEnvBatch.state !== "ok") {
     json(res, 503, {
       ok: false,
-      error: "missing_outreach_secret",
-      message: MSG_MISSING_OUTREACH_SECRET,
+      error:
+        secEnvBatch.state === "empty"
+          ? "empty_outreach_secret"
+          : "missing_outreach_secret",
+      message:
+        secEnvBatch.state === "empty"
+          ? MSG_EMPTY_OUTREACH_SECRET
+          : MSG_MISSING_OUTREACH_SECRET,
     });
     return;
   }
+  const serverSecret = secEnvBatch.value;
 
   if (String(body.secret || "").trim() !== serverSecret) {
     json(res, 403, {
@@ -429,8 +455,37 @@ async function handleSendOutreachBatch(req, res) {
   }
 }
 
+function handleOutreachStatusGet(req, res) {
+  if (req.method !== "GET") {
+    json(res, 405, { ok: false, error: "method_not_allowed" });
+    return;
+  }
+  const sec = getOutreachSecretFromEnv();
+  const ml = !!getMailerLiteToken();
+  let message = "";
+  if (sec.state === "missing") {
+    message =
+      "Variable OUTREACH_API_SECRET no definida en este proceso Node (revisa Railway: servicio correcto, nombre exacto, redeploy).";
+  } else if (sec.state === "empty") {
+    message =
+      "OUTREACH_API_SECRET existe pero el valor está vacío o solo espacios; edita el valor en Railway.";
+  } else {
+    message = "OUTREACH_API_SECRET configurada (valor no vacío).";
+  }
+  json(res, 200, {
+    ok: true,
+    outreachSecret: sec.state,
+    mailerliteKey: ml ? "ok" : "missing",
+    message,
+  });
+}
+
 const server = http.createServer(async (req, res) => {
   const pathname = (req.url || "/").split("?")[0];
+  if (pathname === "/api/outreach-status") {
+    handleOutreachStatusGet(req, res);
+    return;
+  }
   if (pathname === "/api/send-outreach") {
     await handleSendOutreach(req, res);
     return;
