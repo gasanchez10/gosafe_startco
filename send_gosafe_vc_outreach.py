@@ -6,7 +6,7 @@ MailerLite: group, subscriber, HTML campaign (gosafe_vc_outreach_email.html), in
 Env: MAILES_API_KEY o MAILERLITE_API_KEY; optional CALENDLY_URL,
      optional PUBLIC_BASE_URL (sin barra final; logo en /go-safe-logo.png),
      optional OUTREACH_LOGO_URL o LOGO_URL (URL absoluta del PNG; prioridad sobre PUBLIC_BASE_URL).
-     Sin URL: se usa el PNG en GitHub raw (Gmail no muestra base64 en correo).
+     Sin URL: jsDelivr (CDN gratis) sirve el PNG desde GitHub (Gmail no muestra base64 en correo).
      MAILERLITE_GROUP_NAME,
      MAILERLITE_FROM_EMAIL, MAILERLITE_FROM_NAME.
 """
@@ -121,7 +121,7 @@ def upsert_subscriber(token: str, email: str, name: str, group_id: str) -> None:
 
 
 DEFAULT_OUTREACH_LOGO = (
-    "https://raw.githubusercontent.com/gasanchez10/gosafe_startco/main/go-safe-logo.png"
+    "https://cdn.jsdelivr.net/gh/gasanchez10/gosafe_startco@main/go-safe-logo.png"
 )
 
 

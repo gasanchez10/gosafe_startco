@@ -114,9 +114,9 @@ export async function scheduleCampaignInstant(token, campaignId) {
   });
 }
 
-/** Gmail and most clients block data:image/*;base64 in email HTML; always use https URL for logos. */
+/** Gmail blocks data:image/*;base64 in email HTML. Default: jsDelivr (free CDN mirroring public GitHub). */
 const DEFAULT_OUTREACH_LOGO =
-  "https://raw.githubusercontent.com/gasanchez10/gosafe_startco/main/go-safe-logo.png";
+  "https://cdn.jsdelivr.net/gh/gasanchez10/gosafe_startco@main/go-safe-logo.png";
 
 function resolveLogoSrc(publicBaseUrl) {
   const explicit = (
