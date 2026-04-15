@@ -481,6 +481,7 @@
   <div class="tab" onclick="showSection('startups')">Startups Sinergicas</div>
   <div class="tab" onclick="showSection('accelerators')">Aceleradoras</div>
   <div class="tab" onclick="showSection('outreach')">Outreach + Ferial-e</div>
+  <div class="tab" onclick="showSection('outreach-batch')">Outreach un clic</div>
   <div class="tab" onclick="showSection('matrix')">Matriz Completa</div>
 </div>
 
@@ -1287,6 +1288,42 @@
     </div>
   </div>
 
+  <!-- OUTREACH BATCH: lista global, una campaña -->
+  <div class="section" id="outreach-batch">
+    <div class="section-header">
+      <div>
+        <h2>Outreach un clic &mdash; lista mundial</h2>
+        <div class="section-subtitle">Un solo botón: misma plantilla HTML con <code>{$name}</code> por destinatario (MailerLite). Se crea un grupo nuevo solo para este envío y una campaña programada al instante.</div>
+      </div>
+    </div>
+
+    <div class="card" style="max-width:720px;">
+      <div class="card-top">
+        <div>
+          <h3>Contactos (pega tu lista)</h3>
+          <div class="stage">Una l&iacute;nea por persona &middot; hasta 200 correos por disparo</div>
+        </div>
+        <span class="badge badge-high">LOTE</span>
+      </div>
+      <div class="verticals" style="margin-top:12px;font-size:13px;line-height:1.55;color:var(--text-muted);">
+        Formatos aceptados por l&iacute;nea: <code>email@dominio.com,Nombre Apellido</code> &middot; email + tabulador + nombre &middot; <code>email|nombre</code> &middot; solo <code>email</code> (el saludo se arma desde la parte local del correo). L&iacute;neas vac&iacute;as o duplicados se ignoran.
+      </div>
+      <textarea id="ml-batch-list" rows="14" wrap="off" spellcheck="false" placeholder="ana@fund.com,Ana Garc&iacute;a&#10;partner@vc.io&#10;hello@accelerator.org,Equipo" style="margin-top:12px;width:100%;box-sizing:border-box;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:ui-monospace,Menlo,monospace;font-size:12px;line-height:1.45;resize:vertical;"></textarea>
+      <div style="margin-top:8px;font-size:12px;color:var(--text-muted);" id="ml-batch-parse-hint"></div>
+      <div style="margin-top:14px;display:grid;gap:10px;max-width:520px;">
+        <label style="font-size:11px;color:var(--text-muted);">Asunto (compartido para todos)</label>
+        <input id="ml-batch-subject" type="text" value="GoSafe AI - healthtech pre-anestesico (Startco / 15 min si hay fit)" style="padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;" />
+        <label style="font-size:11px;color:var(--text-muted);">Token equipo (<code>OUTREACH_API_SECRET</code>)</label>
+        <input id="ml-batch-secret" type="password" autocomplete="off" placeholder="Secreto compartido" style="padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;" />
+        <button type="button" onclick="window.submitGoSafeOutreachBatch && window.submitGoSafeOutreachBatch()" style="margin-top:6px;padding:12px 18px;border-radius:8px;border:none;background:var(--accent);color:#111;font-weight:800;font-size:14px;cursor:pointer;">Enviar correo a toda la lista (un clic)</button>
+        <div id="ml-batch-status" style="font-size:12px;color:var(--text-muted);min-height:18px;"></div>
+      </div>
+      <div class="reason" style="margin-top:14px;border-left-color:var(--accent2);font-size:12px;">
+        API: <code>POST /api/send-outreach-batch</code> con JSON <code>{ secret, subject?, recipients: [{ email, name }] }</code>. Mismo secreto que el envío individual. L&iacute;mite de ritmo: 5 envíos masivos por hora e IP (ajustable en servidor).
+      </div>
+    </div>
+  </div>
+
   <!-- MATRIX -->
   <div class="section" id="matrix">
     <div class="section-header">
@@ -1347,6 +1384,107 @@ function showSection(id) {
   document.getElementById(id).classList.add('active');
   event.target.classList.add('active');
 }
+function parseRecipientsFromText(text) {
+  var lines = String(text || '').split(/\r?\n/);
+  var out = [];
+  var seen = {};
+  var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  function nameFromLocal(local) {
+    var s = String(local || '').replace(/[._+-]+/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!s.length) return 'Contacto';
+    return s.replace(/\b\w/g, function (x) { return x.toUpperCase(); });
+  }
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i].trim();
+    if (!line) continue;
+    var email = '';
+    var name = '';
+    if (line.indexOf('\t') !== -1) {
+      var pt = line.split('\t');
+      email = (pt[0] || '').trim();
+      name = pt.slice(1).join('\t').trim();
+    } else if (line.indexOf('|') !== -1) {
+      var pp = line.split('|');
+      email = (pp[0] || '').trim();
+      name = pp.slice(1).join('|').trim();
+    } else if (line.indexOf(',') !== -1) {
+      var idx = line.indexOf(',');
+      email = line.slice(0, idx).trim();
+      name = line.slice(idx + 1).trim();
+    } else {
+      email = line.trim();
+    }
+    email = email.toLowerCase();
+    if (!emailRe.test(email)) continue;
+    if (seen[email]) continue;
+    seen[email] = true;
+    if (!name) name = nameFromLocal(email.split('@')[0]);
+    out.push({ email: email, name: name });
+  }
+  return out;
+}
+
+function updateBatchParseHint() {
+  var ta = document.getElementById('ml-batch-list');
+  var hint = document.getElementById('ml-batch-parse-hint');
+  if (!ta || !hint) return;
+  var list = parseRecipientsFromText(ta.value);
+  hint.textContent = list.length ? ('Listos para enviar: ' + list.length + ' contacto(s).') : 'Ninguna l\u00ednea v\u00e1lida todav\u00eda.';
+}
+
+window.submitGoSafeOutreachBatch = async function () {
+  var statusEl = document.getElementById('ml-batch-status');
+  if (!statusEl) return;
+  statusEl.textContent = '';
+  var secret = (document.getElementById('ml-batch-secret') || {}).value || '';
+  var subject = (document.getElementById('ml-batch-subject') || {}).value || '';
+  var ta = document.getElementById('ml-batch-list');
+  var recipients = parseRecipientsFromText((ta && ta.value) || '');
+  if (!secret.trim()) { statusEl.style.color = 'var(--red)'; statusEl.textContent = 'Indica el token (OUTREACH_API_SECRET).'; return; }
+  if (!recipients.length) {
+    statusEl.style.color = 'var(--red)';
+    statusEl.textContent = 'La lista no tiene emails v\u00e1lidos (usa email o email,nombre).';
+    return;
+  }
+  statusEl.style.color = 'var(--text-muted)';
+  statusEl.textContent = 'Enviando ' + recipients.length + ' contactos...';
+  try {
+    var res = await fetch('/api/send-outreach-batch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret: secret.trim(), subject: subject.trim(), recipients: recipients })
+    });
+    var data = {};
+    try { data = await res.json(); } catch (e0) { data = {}; }
+    if (res.ok && data.ok) {
+      statusEl.style.color = 'var(--accent2)';
+      statusEl.textContent = 'Listo. Campa\u00f1a ' + (data.campaignId || '') + ' al grupo \u00ab' + (data.groupName || '') + '\u00bb (' + (data.recipientCount || recipients.length) + '). Revisa MailerLite.';
+      try { if (ta) localStorage.setItem('gosafeOutreachBatchList', ta.value); } catch (e1) {}
+    } else {
+      statusEl.style.color = 'var(--red)';
+      statusEl.textContent = (data && data.message) ? data.message : ((data && data.error) ? data.error : ('Error ' + res.status));
+    }
+  } catch (err) {
+    statusEl.style.color = 'var(--red)';
+    statusEl.textContent = 'No se pudo conectar (solo en dominio desplegado con API activa).';
+  }
+  updateBatchParseHint();
+};
+
+(function initBatchListUi() {
+  var ta = document.getElementById('ml-batch-list');
+  if (!ta) return;
+  try {
+    var s = localStorage.getItem('gosafeOutreachBatchList');
+    if (s) ta.value = s;
+  } catch (e2) {}
+  ta.addEventListener('input', updateBatchParseHint);
+  ta.addEventListener('change', function () {
+    try { localStorage.setItem('gosafeOutreachBatchList', ta.value); } catch (e3) {}
+  });
+  updateBatchParseHint();
+})();
+
 window.submitGoSafeOutreach = async function () {
   var statusEl = document.getElementById('ml-outreach-status');
   if (!statusEl) return;
