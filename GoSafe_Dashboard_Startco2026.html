@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoSafe AI – Dashboard Estratégico Startco 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --card: #12121a;
+    --card-hover: #1a1a28;
+    --border: #2a2a3a;
+    --accent: #c8ff00;
+    --accent2: #00d4aa;
+    --accent3: #7c6aff;
+    --accent4: #ff6b6b;
+    --accent5: #ffa94d;
+    --text: #e8e8f0;
+    --text-muted: #8888a0;
+    --green: #00d4aa;
+    --red: #ff6b6b;
+    --yellow: #c8ff00;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #0f0f18 0%, #1a1028 50%, #0f0f18 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(20px);
+  }
+
+  .header-left { display: flex; align-items: center; gap: 16px; }
+
+  .logo-badge {
+    background: var(--accent);
+    color: #000;
+    font-weight: 900;
+    font-size: 14px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    letter-spacing: 1px;
+  }
+
+  .header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .header-right {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+
+  .stat-pill {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .stat-pill .num {
+    font-weight: 800;
+    color: var(--accent);
+  }
+
+  /* Navigation tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    padding: 16px 40px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+
+  .tab {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-muted);
+  }
+
+  .tab:hover { background: var(--card); color: var(--text); }
+  .tab.active {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+  }
+
+  /* Main content */
+  .content { padding: 24px 40px 60px; }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .section-header h2 {
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .section-subtitle {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-top: 4px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .badge-high { background: rgba(200,255,0,0.15); color: var(--accent); }
+  .badge-med { background: rgba(0,212,170,0.15); color: var(--accent2); }
+  .badge-low { background: rgba(124,106,255,0.15); color: var(--accent3); }
+  .badge-hot { background: rgba(255,107,107,0.15); color: var(--red); }
+  .badge-corp { background: rgba(255,169,77,0.15); color: var(--accent5); }
+
+  /* Grid */
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+    gap: 16px;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card:hover {
+    background: var(--card-hover);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(200,255,0,0.06);
+  }
+
+  .card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .card .stage {
+    font-size: 12px;
+    color: var(--accent2);
+    font-weight: 600;
+  }
+
+  .card .verticals {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin: 8px 0;
+  }
+
+  .card .verticals strong { color: var(--text); }
+
+  .card .reason {
+    background: rgba(200,255,0,0.06);
+    border-left: 3px solid var(--accent);
+    padding: 8px 12px;
+    font-size: 12px;
+    margin-top: 12px;
+    border-radius: 0 6px 6px 0;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .card-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    margin-top: 12px;
+    transition: opacity 0.2s;
+  }
+
+  .card-link:hover { opacity: 0.7; }
+
+  /* Priority indicator */
+  .priority-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    border-radius: 12px 0 0 12px;
+  }
+
+  .priority-bar.high { background: var(--accent); }
+  .priority-bar.med { background: var(--accent2); }
+  .priority-bar.low { background: var(--accent3); }
+
+  /* KPI Row */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .kpi {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .kpi .value {
+    font-size: 32px;
+    font-weight: 900;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .kpi .label {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  /* Speaker cards */
+  .speaker-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.25s;
+  }
+
+  .speaker-card:hover {
+    border-color: var(--accent3);
+    transform: translateY(-2px);
+  }
+
+  .speaker-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .speaker-card .role { font-size: 12px; color: var(--accent2); font-weight: 600; margin-bottom: 8px; }
+  .speaker-card .note { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+  .speaker-card .value-tag {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .value-tag.investor { background: rgba(200,255,0,0.12); color: var(--accent); }
+  .value-tag.client { background: rgba(0,212,170,0.12); color: var(--accent2); }
+  .value-tag.partner { background: rgba(124,106,255,0.12); color: var(--accent3); }
+  .value-tag.ecosystem { background: rgba(255,169,77,0.12); color: var(--accent5); }
+
+  /* Ally cards */
+  .ally-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.25s;
+  }
+
+  .ally-card:hover {
+    border-color: var(--accent5);
+    transform: translateY(-2px);
+  }
+
+  .ally-card h3 { font-size: 15px; font-weight: 700; }
+  .ally-card .type { font-size: 12px; color: var(--accent5); font-weight: 600; margin: 4px 0 8px; }
+  .ally-card .desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+  /* Startup ally cards */
+  .startup-ally {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.25s;
+  }
+
+  .startup-ally:hover {
+    border-color: var(--green);
+    transform: translateY(-2px);
+  }
+
+  .startup-ally h3 { font-size: 15px; font-weight: 700; }
+  .startup-ally .stand { font-size: 11px; color: var(--accent2); font-weight: 600; margin: 4px 0; }
+  .startup-ally .desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+  .startup-ally .synergy {
+    background: rgba(0,212,170,0.08);
+    border-left: 3px solid var(--green);
+    padding: 8px 12px;
+    font-size: 12px;
+    margin-top: 10px;
+    border-radius: 0 6px 6px 0;
+    line-height: 1.5;
+  }
+
+  /* Summary table */
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+  }
+
+  .summary-table th {
+    background: var(--card);
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    border-bottom: 2px solid var(--border);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .summary-table td {
+    padding: 12px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  .summary-table tr:hover td { background: var(--card); }
+
+  /* Filter */
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text-muted);
+    transition: all 0.2s;
+  }
+
+  .filter-btn:hover, .filter-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(200,255,0,0.06);
+  }
+
+  /* GoSafe Summary */
+  .gosafe-summary {
+    background: linear-gradient(135deg, rgba(200,255,0,0.04) 0%, rgba(0,212,170,0.04) 100%);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 28px;
+  }
+
+  .gosafe-summary h3 {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 16px;
+    color: var(--accent);
+  }
+
+  .gosafe-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+
+  .gosafe-item .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+  .gosafe-item .val { font-size: 15px; font-weight: 700; margin-top: 4px; }
+
+  @media (max-width: 768px) {
+    .header { padding: 16px 20px; flex-direction: column; gap: 12px; }
+    .content { padding: 16px 20px; }
+    .tabs { padding: 12px 20px; }
+    .grid-3, .grid-2 { grid-template-columns: 1fr; }
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo-badge">GO SAFE AI</div>
+    <div>
+      <h1>Dashboard Estrategico &mdash; Startco 2026</h1>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Plaza Mayor Medellin &bull; 16-17 Abril 2026 &bull; Stand B13</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="stat-pill"><span class="num">$200K</span> Buscados (10% equity)</div>
+    <div class="stat-pill"><span class="num">14</span> VCs prioritarios</div>
+    <div class="stat-pill"><span class="num">8</span> Aliados clave</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showSection('overview')">Resumen GoSafe</div>
+  <div class="tab" onclick="showSection('vcs-priority')">VCs Prioritarios (Healthtech/IA)</div>
+  <div class="tab" onclick="showSection('vcs-secondary')">VCs Secundarios</div>
+  <div class="tab" onclick="showSection('corporate')">Corporate VCs &amp; Banca</div>
+  <div class="tab" onclick="showSection('allies')">Aliados Estrategicos</div>
+  <div class="tab" onclick="showSection('speakers')">Contactos Web Startco</div>
+  <div class="tab" onclick="showSection('startups')">Startups Sinergicas</div>
+  <div class="tab" onclick="showSection('accelerators')">Aceleradoras</div>
+  <div class="tab" onclick="showSection('outreach')">Outreach + Ferial-e</div>
+  <div class="tab" onclick="showSection('matrix')">Matriz Completa</div>
+</div>
+
+<div class="content">
+
+  <!-- OVERVIEW -->
+  <div class="section active" id="overview">
+    <div class="gosafe-summary">
+      <h3>GoSafe AI &mdash; Optimizacion Pre-Anestesica con IA</h3>
+      <div class="gosafe-grid">
+        <div class="gosafe-item">
+          <div class="label">Problema</div>
+          <div class="val">+2M cirug&iacute;as canceladas/a&ntilde;o en Colombia</div>
+        </div>
+        <div class="gosafe-item">
+          <div class="label">Soluci&oacute;n</div>
+          <div class="val">Triage IA (98%) + Agente 24/7 + Automatizaci&oacute;n</div>
+        </div>
+        <div class="gosafe-item">
+          <div class="label">MVP</div>
+          <div class="val">Hospital Regional Sogamoso (251K hab.)</div>
+        </div>
+        <div class="gosafe-item">
+          <div class="label">Equipo</div>
+          <div class="val">Dr. Gonzalez | G. Sanchez (PhD IA) | G. Salazar (UX) | C. Montefr&iacute;o (CMO)</div>
+        </div>
+        <div class="gosafe-item">
+          <div class="label">Ronda</div>
+          <div class="val" style="color:var(--accent)">$200K USD por 10% Equity</div>
+        </div>
+        <div class="gosafe-item">
+          <div class="label">Uso de Fondos</div>
+          <div class="val">Dev team + Fuerza comercial + Interoperabilidad IPS</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="value">90.5%</div>
+        <div class="label">Reduccion tiempo de espera</div>
+      </div>
+      <div class="kpi">
+        <div class="value">2.3x</div>
+        <div class="label">Valor economico generado</div>
+      </div>
+      <div class="kpi">
+        <div class="value">2x</div>
+        <div class="label">Productividad cl&iacute;nica</div>
+      </div>
+      <div class="kpi">
+        <div class="value">$4.3M</div>
+        <div class="label">Ingresos proyectados (de $1.9M)</div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <div>
+        <h2>Estrategia de Abordaje en Startco 2026</h2>
+        <div class="section-subtitle">Prioridad de fondos segun fit con GoSafe (Healthtech + IA + Pre-seed/Seed + LATAM)</div>
+      </div>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi" style="border-color:var(--accent)">
+        <div class="value" style="font-size:24px">14</div>
+        <div class="label">VCs con vertical Healthtech/IA</div>
+        <div style="margin-top:6px;font-size:11px;color:var(--accent)">PRIORIDAD MAXIMA</div>
+      </div>
+      <div class="kpi" style="border-color:var(--accent2)">
+        <div class="value" style="font-size:24px;-webkit-text-fill-color:var(--accent2)">8</div>
+        <div class="label">VCs Agnosticos / SaaS / IA general</div>
+        <div style="margin-top:6px;font-size:11px;color:var(--accent2)">PRIORIDAD MEDIA</div>
+      </div>
+      <div class="kpi" style="border-color:var(--accent5)">
+        <div class="value" style="font-size:24px;-webkit-text-fill-color:var(--accent5)">5</div>
+        <div class="label">Corporate VCs &amp; Banca</div>
+        <div style="margin-top:6px;font-size:11px;color:var(--accent5)">ESTRATEGICOS</div>
+      </div>
+      <div class="kpi" style="border-color:var(--accent3)">
+        <div class="value" style="font-size:24px;-webkit-text-fill-color:var(--accent3)">11</div>
+        <div class="label">Speakers / Partners / Startups aliados</div>
+        <div style="margin-top:6px;font-size:11px;color:var(--accent3)">NETWORKING</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VCS PRIORITY -->
+  <div class="section" id="vcs-priority">
+    <div class="section-header">
+      <div>
+        <h2>VCs Prioritarios &mdash; Healthtech &amp; IA</h2>
+        <div class="section-subtitle">Fondos con vertical expl&iacute;cita en salud, healthtech, biotech o IA aplicada. M&aacute;ximo fit con GoSafe.</div>
+      </div>
+      <span class="badge badge-high">PRIORIDAD MAXIMA</span>
+    </div>
+
+    <div class="grid-3">
+
+      <div class="card">
+        <div class="priority-bar high"></div>
+        <div class="card-top">
+          <div>
+            <h3>EWA Capital</h3>
+            <div class="stage">Pre-seed, Seed &amp; Series A</div>
+          </div>
+          <span class="badge badge-high">TOP</span>
+        </div>
+        <div class="verticals"><strong>Verticales:</strong> Educaci&oacute;n, <strong>salud</strong>, servicios financieros, retail, agronegocios</div>
+        <div class="reason">Salud como vertical directa. Stage perfecto (pre-seed a Series A). Fit ideal con el modelo B2B cl&iacute;nico de GoSafe.</div>
+        <a class="card-link" href="https://ewa.capital/" target="_blank">ewa.capital &rarr;</a>
+      </div>
+
+      <div class="card">
+        <div class="priority-bar high"></div>
+        <div class="card-top">
+          <div>
+            <h3>IGNIA Partners</h3>
+            <div class="stage">Etapas tempranas hasta crecimiento</div>
+          </div>
+          <span class="badge badge-high">TOP</span>
+        </div>
+        <div class="verticals"><strong>Verticales:</strong> Fintech, e-commerce, SaaS, marketplaces, <strong>healthtech</strong> y tecnolog&iacute;a aplicada</div>
+        <div class="reason">Healthtech expl&iacute;cito + rango desde temprana hasta crecimiento. Pueden acompa&ntilde;ar en m&uacute;ltiples rondas.</div>
+        <a class="card-link" href="https://www.ignia.vc/" target="_blank">ignia.vc &rarr;</a>
+      </div>
+
+      <div class="card">
+        <div class="priority-bar high"></div>
+        <div class="card-top">
+          <div>
+            <h3>Krealo</h3>
+            <div class="stage">Seed &amp; Serie A</div>
+          </div>
+          <span class="badge badge-high">TOP</span>
+        </div>
+        <div class="verticals"><strong>Verticales:</strong> Colombia, Per&uacute;, M&eacute;xico, Chile &mdash; Fintech, Insurtech, <strong>Healthtech</strong>, B2B, Infraestructura Digital</div>
+        <div class="reason">Healthtech + Colombia + B2B. Brazo de inversi&oacute;n de Credicorp. Puede abrir puertas a ecosistema financiero/seguros.</div>
+        <a class="card-link" href="https://krealo.pe/" target="_blank">krealo.pe &rarr;</a>
+      </div>
+
+      <div class="card">
+        <div class="priority-bar high"></div>
+        <div class="card-top">
+          <div>
+            <h3>Latin Leap</h3>
+            <div class="stage">Seed / Early-stage</div>
+          </div>
+          <span class="badge badge-high">TOP</span>
+        </div>
+        <div class="verticals"><strong>Verticales:</strong> Fintech, <strong>healthtech</strong>, edtech, proptech, mobility-tech</div>
+        <div class="reason">Healthtech directo + seed stage. Foco LATAM, excelente para el escalamiento regional que busca GoSafe.</div>
+        <a class="card-link" href="https://latinleap.vc/" target="_blank">latinleap.vc &rarr;</a>
+      </div>
+
+      <div class="card">
+        <div class="priority-bar high"></div>
+        <div class="card-top">
+          <div>
+            <h3>Capria</h3>
+            <div class="stage">Seed / Series A en adelante</div>
+          </div>
+          <span class="badge badge-high">TOP</span>
+        </div>
+        <div class="verticals"><strong>Verticales:</strong> Fintech, agtech, <strong>healthtech</strong>, jobtech, SaaS e <strong>IA aplicada</strong> (Applied / Generative AI)</div>
+        <div class="reason">Doble fit: Healthtech + IA aplicada. Exactamente lo que es GoSafe. Uno de los m&aacute;s relevantes del directorio.</div>
+        <a class="card-link" href="https://capria.vc/" target="_blank">capria.vc &rarr;</a>
+      </div>
+
+      <div class="card">
+        <div class="priority-bar high"></div>
+        <div class="card-top">
+          <div>
+            <h3>M Capital</h3>
+            <div class="stage">Preseed &amp; Seed</div>
+          </div>
+          <span class="badge badge-high">TOP</span>
+        </div>
+        <div class="verticals"><strong>Verticales:</strong> <strong>AI</strong>, Climate/EnergyTech, Fintech, <strong>Health/BioTech</strong>. Foco LATAM (Colombia, M&eacute;xico, Brasil)</div>
+        <div class="reason">IA + Health/BioTech + Colombia como foco geogr&aacute;fico. Stage preseed/seed ideal para la ronda de $200K.</div>
+        <a class="card-link" href="https://www.linkedin.com/company/m-capital-vehículo/" target="_blank">LinkedIn &rarr;</a>
+      </div>
+
+      <div class="card">
+        <div class="priority-bar high"></div>
+        <div class="card-top">
+          <div>
+            <h3>BID LAB</h3>
+            <div class="stage">Invierte en fondos &amp; directo</div>
+          </div>
+          <span class="badge badge-high">TOP</span>
+        </div>
+        <div class="verticals"><strong>Verticales:</strong> Ecosistemas Incipientes, <strong>Salud/Biotech</strong>, Edtech, Agtech, Climatetech</div>
+        <div class="reason">Laboratorio de innovaci&oacute;n del BID. Salud/Biotech expl&iacute;cito. Puede aportar capital + credibilidad institucional.</div>
+        <a class="card-link" href="https://bidlab.org/es" target="_blank">bidlab.org &rarr;</a>
+      </div>
+
+      <div class="card">
+        <div class="priority-bar high"></div>
+        <div class="card-top">
+          <div>
+            <h3>Alive Ventures</h3>
+            <div class="stage">Colombia &amp; Per&uacute;</div>
+          </div>
+          <span class="badge badge-high">TOP</span>
+        </div>
+        <div class="verticals"><strong>Verticales:</strong> Edtech, HRtech, Fintech, Agtech, <strong>Healthtech</strong>, Circular Economy, Foodtech</div>
+        <div class="reason">Healthtech + foco Colombia. Tienen experiencia en impacto social, ideal para el componente humano de GoSafe.</div>
+        <a class="card-link" href="http://www.alive-ventures.com/" target="_blank">alive-ventures.com &rarr;</a>
+      </div>
+
+      <div class="card">
+        <div class="priority-bar high"></div>
+        <div class="card-top">
+          <div>
+            <h3>Cube Ventures</h3>
+            <div class="stage">Pre-seed &amp; Seed</div>
+          </div>
+          <span class="badge badge-med">FIT</span>
+        </div>
+        <div class="verticals"><strong>Verticales:</strong> Fintech, edtech, <strong>healthtech</strong>, infraestructura tecnol&oacute;gica, innovaci&oacute;n digital, smart cities</div>
+        <div class="reason">Healthtech + infraestructura tecnol&oacute;gica = GoSafe encaja en ambos. Stage pre-seed/seed alineado.</div>
+        <a class="card-link" href="https://www.cube.ventures/en" target="_blank">cube.ventures &rarr;</a>
+      </div>
+
+      <div class="card">
+        <div class="priority-bar high"></div>
+        <div class="card-top">
+          <div>
+            <h3>New Ventures Capital</h3>
+            <div class="stage">Early-stage / Seed</div>
+          </div>
+          <span class="badge badge-med">FIT</span>
+        </div>
+        <div class="verticals"><strong>Verticales:</strong> Inclusi&oacute;n financiera, fintech, <strong>salud</strong>, educaci&oacute;n, clean-tech, impacto social</div>
+        <div class="reason">Salud + impacto social. GoSafe democratiza acceso a mejor preparaci&oacute;n prequir&uacute;rgica. Narrativa poderosa.</div>
+        <a class="card-link" href="https://www.nvgroup.org/" target="_blank">nvgroup.org &rarr;</a>
+      </div>
+
+      <div class="card">
+        <div class="priority-bar high"></div>
+        <div class="card-top">
+          <div>
+            <h3>Simma Capital</h3>
+            <div class="stage">Pre-seed &amp; Seed</div>
+          </div>
+          <span class="badge badge-med">FIT</span>
+        </div>
+        <div class="verticals"><strong>Verticales:</strong> Software, fintech, edtech, foodtech, <strong>healthtech</strong>, marketplaces</div>
+        <div class="reason">Healthtech + software + pre-seed/seed. GoSafe es SaaS cl&iacute;nico: encaja perfecto en su tesis.</div>
+        <a class="card-link" href="https://co.linkedin.com/company/simma-capital" target="_blank">LinkedIn &rarr;</a>
+      </div>
+
+      <div class="card">
+        <div class="priority-bar high"></div>
+        <div class="card-top">
+          <div>
+            <h3>Lotux VC</h3>
+            <div class="stage">Preseed (Ticket: $50K-$100K)</div>
+          </div>
+          <span class="badge badge-med">FIT</span>
+        </div>
+        <div class="verticals"><strong>Verticales:</strong> Finance, Insurance, Logistics, eCommerce, Education, <strong>Health</strong>. LATAM</div>
+        <div class="reason">Health + ticket peque&ntilde;o ($50-100K). Podr&iacute;an co-invertir en la ronda de $200K junto con otro fondo.</div>
+        <a class="card-link" href="http://www.lotux.vc/" target="_blank">lotux.vc &rarr;</a>
+      </div>
+
+      <div class="card">
+        <div class="priority-bar high"></div>
+        <div class="card-top">
+          <div>
+            <h3>Corteza Capital</h3>
+            <div class="stage">Pre-seed, Seed, Serie A</div>
+          </div>
+          <span class="badge badge-med">FIT</span>
+        </div>
+        <div class="verticals"><strong>Verticales:</strong> Fintech, <strong>AI (GPU Native)</strong>, Cybersecurity. Am&eacute;ricas</div>
+        <div class="reason">IA como vertical core. GoSafe es IA aplicada a salud. El &aacute;ngulo tech-first les va a resonar.</div>
+        <a class="card-link" href="https://www.cortezacapital.com/" target="_blank">cortezacapital.com &rarr;</a>
+      </div>
+
+      <div class="card">
+        <div class="priority-bar high"></div>
+        <div class="card-top">
+          <div>
+            <h3>Caribe Ventures</h3>
+            <div class="stage">Microfondo &mdash; 2do semestre 2026</div>
+          </div>
+          <span class="badge badge-med">FIT</span>
+        </div>
+        <div class="verticals"><strong>Verticales:</strong> $500K para startups pre-seed con <strong>AI</strong>. Foco Caribe</div>
+        <div class="reason">Fondo nuevo con tesis 100% AI + pre-seed. Sembrar relaci&oacute;n ahora para cuando abran segundo semestre.</div>
+        <a class="card-link" href="https://www.caribe.ventures/" target="_blank">caribe.ventures &rarr;</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- VCS SECONDARY -->
+  <div class="section" id="vcs-secondary">
+    <div class="section-header">
+      <div>
+        <h2>VCs Secundarios &mdash; Agn&oacute;sticos / SaaS / Tech General</h2>
+        <div class="section-subtitle">No tienen healthtech expl&iacute;cito pero invierten en SaaS, IA o son agn&oacute;sticos. Oportunidad si se posiciona GoSafe como SaaS tech.</div>
+      </div>
+      <span class="badge badge-med">PRIORIDAD MEDIA</span>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="priority-bar med"></div>
+        <div class="card-top"><div><h3>Winter Kpital</h3><div class="stage">Pre-seed &ndash; Growth</div></div></div>
+        <div class="verticals"><strong>Verticales:</strong> SaaS, <strong>AI</strong>, marketplaces, enterprise-software</div>
+        <div class="reason">SaaS + AI. GoSafe como enterprise SaaS de IA m&eacute;dica encaja en su tesis.</div>
+        <a class="card-link" href="https://winterkpital.com/" target="_blank">winterkpital.com &rarr;</a>
+      </div>
+
+      <div class="card">
+        <div class="priority-bar med"></div>
+        <div class="card-top"><div><h3>MrPink VC</h3><div class="stage">Seed / Early-stage</div></div></div>
+        <div class="verticals"><strong>Verticales:</strong> Agn&oacute;sticas</div>
+        <div class="reason">100% agn&oacute;stico. Si les gusta la tracci&oacute;n (90.5% reducci&oacute;n, 2.3x valor), van a considerar.</div>
+        <a class="card-link" href="https://mrpink.vc/" target="_blank">mrpink.vc &rarr;</a>
+      </div>
+
+      <div class="card">
+        <div class="priority-bar med"></div>
+        <div class="card-top"><div><h3>Angel Hub</h3><div class="stage">Seed &ndash; Etapa temprana</div></div></div>
+        <div class="verticals"><strong>Verticales:</strong> Agn&oacute;stico</div>
+        <div class="reason">Red de &aacute;ngeles de M&eacute;xico. Puede facilitar expansi&oacute;n MX y co-inversi&oacute;n.</div>
+        <a class="card-link" href="https://www.angelhub.mx/" target="_blank">angelhub.mx &rarr;</a>
+      </div>
+
+      <div class="card">
+        <div class="priority-bar med"></div>
+        <div class="card-top"><div><h3>UPVIEW Ventures</h3><div class="stage">Pre-seed &ndash; Seed</div></div></div>
+        <div class="verticals"><strong>Verticales:</strong> Fintech, Agrotech, <strong>IA, biotech</strong>, marketplaces</div>
+        <div class="reason">IA + biotech. GoSafe toca ambos espacios. Venture Studio con potencial valor agregado.</div>
+        <a class="card-link" href="https://upviewventures.com/venture-studio-2025/" target="_blank">upviewventures.com &rarr;</a>
+      </div>
+
+      <div class="card">
+        <div class="priority-bar med"></div>
+        <div class="card-top"><div><h3>Digital Hub Monterrey</h3><div class="stage">Seed &amp; Pre-Series A</div></div></div>
+        <div class="verticals"><strong>Verticales:</strong> Fondo multicorporativo enfocado en startups de <strong>IA</strong></div>
+        <div class="reason">100% IA. Multicorporativo = conexiones con corporaciones. Puerta a M&eacute;xico.</div>
+        <a class="card-link" href="http://www.mtydigitalhub.com/" target="_blank">mtydigitalhub.com &rarr;</a>
+      </div>
+
+      <div class="card">
+        <div class="priority-bar med"></div>
+        <div class="card-top"><div><h3>30N Ventures</h3><div class="stage">Pre-Seed &ndash; Seed</div></div></div>
+        <div class="verticals"><strong>Verticales:</strong> Fintech, marketplaces, SaaS, consumer tech</div>
+        <div class="reason">SaaS + pre-seed/seed. Si se posiciona GoSafe como SaaS B2B, hay fit.</div>
+        <a class="card-link" href="https://www.30n.vc/" target="_blank">30n.vc &rarr;</a>
+      </div>
+
+      <div class="card">
+        <div class="priority-bar med"></div>
+        <div class="card-top"><div><h3>B Venture Capital</h3><div class="stage">Pre-seed &ndash; Seed</div></div></div>
+        <div class="verticals"><strong>Verticales:</strong> Fintech, SaaS, agnostic / tech startups</div>
+        <div class="reason">Agn&oacute;stico + SaaS + stage ideal. Opci&oacute;n s&oacute;lida para completar la ronda.</div>
+        <a class="card-link" href="https://www.bventure.capital/" target="_blank">bventure.capital &rarr;</a>
+      </div>
+
+      <div class="card">
+        <div class="priority-bar med"></div>
+        <div class="card-top"><div><h3>Inqlab</h3><div class="stage">Early-stage / Seed</div></div></div>
+        <div class="verticals"><strong>Verticales:</strong> Agn&oacute;sticas, foco en fintech, e-commerce, edtech, <strong>healthtech</strong>, SaaS</div>
+        <div class="reason">Healthtech en su radar recurrente. Aceleradora colombiana con buen ecosistema local.</div>
+        <a class="card-link" href="https://www.inqlab.co/" target="_blank">inqlab.co &rarr;</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CORPORATE VCS -->
+  <div class="section" id="corporate">
+    <div class="section-header">
+      <div>
+        <h2>Corporate Venture Capital &amp; Banca</h2>
+        <div class="section-subtitle">Fondos corporativos y bancarios. Ideales para alianzas estrat&eacute;gicas, pilotos y canales de distribuci&oacute;n.</div>
+      </div>
+      <span class="badge badge-corp">ESTRATEGICO</span>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="priority-bar high"></div>
+        <div class="card-top"><div><h3>Bancolombia Ventures</h3><div class="stage">CVC de Bancolombia</div></div><span class="badge badge-hot">CLAVE</span></div>
+        <div class="verticals"><strong>Tipo:</strong> Departamento de Corporate Venture Capital del banco m&aacute;s grande de Colombia</div>
+        <div class="reason">Bancolombia es sponsor Unicornio de Startco. Acceso a red de cl&iacute;nicas/hospitales que son clientes del banco. Doble valor: inversi&oacute;n + distribuci&oacute;n.</div>
+        <a class="card-link" href="https://www.bancolombia.com/personas" target="_blank">bancolombia.com &rarr;</a>
+      </div>
+
+      <div class="card">
+        <div class="priority-bar high"></div>
+        <div class="card-top"><div><h3>EPM Ventures</h3><div class="stage">Hasta $150 mil millones COP</div></div><span class="badge badge-corp">CVC</span></div>
+        <div class="verticals"><strong>Verticales:</strong> Ciudades inteligentes, plataformas de negocio, empresa innovadora</div>
+        <div class="reason">Fondo II con tickets grandes. Ciudades inteligentes incluye infraestructura de salud. Medell&iacute;n = territorio natural de GoSafe.</div>
+        <a class="card-link" href="https://www.epm.com.co/institucional/innovacion/programa-ventures-epm/" target="_blank">epm.com.co &rarr;</a>
+      </div>
+
+      <div class="card">
+        <div class="priority-bar med"></div>
+        <div class="card-top"><div><h3>JP Morgan</h3><div class="stage">Instituci&oacute;n financiera global</div></div><span class="badge badge-corp">BANCA</span></div>
+        <div class="verticals"><strong>Tipo:</strong> M&uacute;ltiples l&iacute;neas de negocio</div>
+        <div class="reason">Presencia en Startco como legitimador. Conexi&oacute;n para futuras rondas m&aacute;s grandes y acceso a mercado internacional.</div>
+        <a class="card-link" href="https://www.jpmorgan.com/CO/en/about-us" target="_blank">jpmorgan.com &rarr;</a>
+      </div>
+
+      <div class="card">
+        <div class="priority-bar med"></div>
+        <div class="card-top"><div><h3>Corona CVC</h3><div class="stage">Corporate VC</div></div><span class="badge badge-corp">CVC</span></div>
+        <div class="verticals"><strong>Verticales:</strong> Startups con fit a Sodimac Corona y su core business</div>
+        <div class="reason">Menor fit directo, pero Corona tiene una divisi&oacute;n de bienestar y hogar. Conexi&oacute;n a largo plazo.</div>
+        <a class="card-link" href="https://empresa.corona.co/" target="_blank">empresa.corona.co &rarr;</a>
+      </div>
+
+      <div class="card">
+        <div class="priority-bar med"></div>
+        <div class="card-top"><div><h3>Progreso X</h3><div class="stage">CVC de Progreso</div></div><span class="badge badge-corp">CVC</span></div>
+        <div class="verticals"><strong>Tipo:</strong> Open innovation &amp; CVC arm de Progreso</div>
+        <div class="reason">Open innovation corporativa. Pueden conectar con programas de bienestar empresarial de Progreso.</div>
+        <a class="card-link" href="https://www.progreso-x.com/" target="_blank">progreso-x.com &rarr;</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALLIES -->
+  <div class="section" id="allies">
+    <div class="section-header">
+      <div>
+        <h2>Aliados Estrat&eacute;gicos &mdash; Sponsors &amp; Partners Startco</h2>
+        <div class="section-subtitle">Organizaciones sponsor del evento con potencial como clientes, socios o facilitadores para GoSafe.</div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="ally-card">
+        <h3>Compensar</h3>
+        <div class="type">Sponsor Unicornio Startco | Caja de Compensaci&oacute;n</div>
+        <div class="desc">Una de las cajas de compensaci&oacute;n m&aacute;s grandes de Colombia con red de cl&iacute;nicas y hospitales propios. <strong>Potencial cliente directo</strong> para implementar GoSafe en sus centros m&eacute;dicos y quir&uacute;rgicos.</div>
+        <span class="value-tag client">CLIENTE POTENCIAL</span>
+      </div>
+
+      <div class="ally-card">
+        <h3>Comfama</h3>
+        <div class="type">Sponsor Unicornio Startco | Caja de Compensaci&oacute;n</div>
+        <div class="desc">Caja de compensaci&oacute;n de Antioquia con servicios de salud. Red de atenci&oacute;n que podr&iacute;a beneficiarse de optimizaci&oacute;n prequir&uacute;rgica. <strong>Potencial cliente y aliado de distribuci&oacute;n regional.</strong></div>
+        <span class="value-tag client">CLIENTE POTENCIAL</span>
+      </div>
+
+      <div class="ally-card">
+        <h3>AWS Startups (Amazon)</h3>
+        <div class="type">Sponsor Unicornio Startco | Infraestructura Cloud</div>
+        <div class="desc">Cr&eacute;ditos cloud, mentoring t&eacute;cnico y acceso al programa AWS Activate. Carlos Ordo&ntilde;ez (Head LATAM) estar&aacute; presente. <strong>Aliado tech esencial para escalar infraestructura de IA.</strong></div>
+        <span class="value-tag partner">SOCIO TECH</span>
+      </div>
+
+      <div class="ally-card">
+        <h3>NVIDIA Inception</h3>
+        <div class="type">Aliado Startco | Aceleraci&oacute;n IA</div>
+        <div class="desc">Andrei Golfeto (LatAm Manager) gestiona 1,600+ startups. Programa de aceleraci&oacute;n con GPU credits, mentoring IA y visibilidad. <strong>Cr&iacute;tico para el motor de IA de GoSafe.</strong></div>
+        <span class="value-tag partner">ACELERADOR IA</span>
+      </div>
+
+      <div class="ally-card">
+        <h3>Ruta N</h3>
+        <div class="type">Sponsor Unicornio Startco | Innovaci&oacute;n Medell&iacute;n</div>
+        <div class="desc">Centro de innovaci&oacute;n de Medell&iacute;n. Conecta startups con hospitales y cl&iacute;nicas de la ciudad. <strong>Facilitador clave para pilotos en Medell&iacute;n.</strong></div>
+        <span class="value-tag ecosystem">ECOSISTEMA</span>
+      </div>
+
+      <div class="ally-card">
+        <h3>Endeavor</h3>
+        <div class="type">Co-organizador | Expert Meetings</div>
+        <div class="desc">Red global de emprendimiento de alto impacto. Organiza Expert Meetings en Startco. <strong>Acceso a mentores, inversores y conexiones internacionales de primer nivel.</strong></div>
+        <span class="value-tag ecosystem">MENTORING</span>
+      </div>
+
+      <div class="ally-card">
+        <h3>Colombia Fintech</h3>
+        <div class="type">Aliado Sectorial Startco</div>
+        <div class="desc">Asociaci&oacute;n fintech de Colombia. VP Mar&iacute;a Mercedes Agudelo estar&aacute; como speaker. <strong>Conexi&oacute;n con aseguradoras y EPS que usan fintech en salud.</strong></div>
+        <span class="value-tag ecosystem">ECOSISTEMA</span>
+      </div>
+
+      <div class="ally-card">
+        <h3>Nido</h3>
+        <div class="type">Sponsor Unicornio Startco</div>
+        <div class="desc">Plataforma de innovaci&oacute;n corporativa. Puede facilitar pilotos con corporaciones del sector salud y bienestar que hacen parte de su red.</div>
+        <span class="value-tag ecosystem">INNOVACI&Oacute;N</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPEAKERS / WEB CONTACTS -->
+  <div class="section" id="speakers">
+    <div class="section-header">
+      <div>
+        <h2>Contactos Valiosos &mdash; Speakers &amp; L&iacute;deres en Startco 2026</h2>
+        <div class="section-subtitle">Personas clave identificadas en la web de Startco con potencial para GoSafe como clientes, inversores o conectores.</div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="speaker-card">
+        <h3>Luz Mar&iacute;a Vel&aacute;squez</h3>
+        <div class="role">VP Personas, PYMES y Empresas &mdash; Bancolombia</div>
+        <div class="note">30+ a&ntilde;os en sector financiero. Experta en transformaci&oacute;n digital. Puede conectar GoSafe con Bancolombia Ventures y con la red hospitalaria que bancariza Bancolombia.</div>
+        <span class="value-tag investor">INVERSI&Oacute;N + CLIENTE</span>
+      </div>
+
+      <div class="speaker-card">
+        <h3>Carlos Ordo&ntilde;ez</h3>
+        <div class="role">Head of Startup Tech, Latin America &mdash; AWS</div>
+        <div class="note">Fund&oacute; el centro de desarrollo de Amazon en M&eacute;xico. L&iacute;der de comunidad Alexa. Puede facilitar cr&eacute;ditos AWS, aceleraci&oacute;n y contactos con healthtech global.</div>
+        <span class="value-tag partner">SOCIO TECH</span>
+      </div>
+
+      <div class="speaker-card">
+        <h3>Andrei Golfeto</h3>
+        <div class="role">LatAm Startups & VCs Manager &mdash; NVIDIA Inception</div>
+        <div class="note">Gestiona 1,600+ startups con tecnolog&iacute;a NVIDIA. Acceso a GPUs, cr&eacute;ditos y programa de aceleraci&oacute;n. Cr&iacute;tico para escalar los modelos de IA de GoSafe.</div>
+        <span class="value-tag partner">ACELERADOR IA</span>
+      </div>
+
+      <div class="speaker-card">
+        <h3>Hern&aacute;n Corral</h3>
+        <div class="role">COO & Co-Founder &mdash; Pomelo (ex-COO Naranja X)</div>
+        <div class="note">Experto en infraestructura que habilita cientos de fintechs. Visi&oacute;n de plataforma. Puede dar mentoring sobre c&oacute;mo escalar GoSafe como infraestructura cl&iacute;nica.</div>
+        <span class="value-tag ecosystem">MENTOR</span>
+      </div>
+
+      <div class="speaker-card">
+        <h3>Mar&iacute;a Mercedes Agudelo</h3>
+        <div class="role">VP Operaciones &mdash; Colombia Fintech (ex-KPMG)</div>
+        <div class="note">Lider&oacute; programa Emerging Giants. Conexiones con aseguradoras, EPS y entidades de salud que adoptan fintech. Puente entre salud y finanzas.</div>
+        <span class="value-tag client">CONECTOR SALUD-FINTECH</span>
+      </div>
+
+      <div class="speaker-card">
+        <h3>Alexandra Mendoza</h3>
+        <div class="role">CEO & Co-Founder &mdash; Liquitech</div>
+        <div class="note">Finalista &ldquo;Emprendedora del A&ntilde;o&rdquo; representando Colombia/LATAM. Red de emprendedoras e inversores. Puede conectar con fondos de impacto.</div>
+        <span class="value-tag ecosystem">RED DE INVERSORES</span>
+      </div>
+
+      <div class="speaker-card">
+        <h3>Ver&oacute;nica Crisafulli</h3>
+        <div class="role">CEO &mdash; MO Credit Platform (ex-Bain, Mastercard)</div>
+        <div class="note">20+ a&ntilde;os transformando cr&eacute;dito con tech. Experiencia en Bain y Mastercard. Potencial mentora en modelo de negocio SaaS B2B y pricing para GoSafe.</div>
+        <span class="value-tag ecosystem">MENTOR</span>
+      </div>
+
+      <div class="speaker-card">
+        <h3>Moishe Mana</h3>
+        <div class="role">Founder & Chairman &mdash; Mana Common (Miami)</div>
+        <div class="note">Transform&oacute; Wynwood y Flagler District en Miami. Desarrollador de ecosistemas. Conexi&oacute;n para expansi&oacute;n GoSafe a mercado hispano en EE.UU.</div>
+        <span class="value-tag investor">EXPANSI&Oacute;N EEUU</span>
+      </div>
+
+      <div class="speaker-card">
+        <h3>Dusko Kelez</h3>
+        <div class="role">Cofounder & CEO &mdash; Hapi (ex-COO Grin, Taximo)</div>
+        <div class="note">Expansi&oacute;n a 20+ pa&iacute;ses. Experiencia en escalamiento global de startups LATAM. Mentor ideal para la estrategia de crecimiento regional.</div>
+        <span class="value-tag ecosystem">ESCALAMIENTO</span>
+      </div>
+
+      <div class="speaker-card">
+        <h3>Pedro Montagut</h3>
+        <div class="role">Dir. Marketing & Producto &mdash; Claro Colombia</div>
+        <div class="note">15+ a&ntilde;os en telecomunicaciones y soluciones digitales. Claro tiene servicios de telesalud. Posible canal de distribuci&oacute;n tecnol&oacute;gico para GoSafe.</div>
+        <span class="value-tag client">DISTRIBUCI&Oacute;N</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STARTUPS -->
+  <div class="section" id="startups">
+    <div class="section-header">
+      <div>
+        <h2>Startups Sin&eacute;rgicas &mdash; Healthcare &amp; Biotech en Startco</h2>
+        <div class="section-subtitle">Startups del sector salud que podr&iacute;an ser aliados, partners de integraci&oacute;n o co-sellers con GoSafe.</div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="startup-ally">
+        <h3>Medvision</h3>
+        <div class="stand">Healthcare &amp; Biotech</div>
+        <div class="desc">Optimiza la ruta del paciente de inicio a fin, asegurando eficiencia operativa y cumplimiento del servicio, con foco en cirug&iacute;a.</div>
+        <div class="synergy"><strong>Sinergia:</strong> Complemento directo. Medvision optimiza la ruta quir&uacute;rgica general; GoSafe optimiza la preparaci&oacute;n preanest&eacute;sica. Integraci&oacute;n natural.</div>
+      </div>
+
+      <div class="startup-ally">
+        <h3>Clau Health</h3>
+        <div class="stand">Stand A13 &bull; Health IT</div>
+        <div class="desc">Control Tower que conecta datos, operaci&oacute;n y decisiones para que la salud deje de funcionar en silos.</div>
+        <div class="synergy"><strong>Sinergia:</strong> GoSafe genera datos preanest&eacute;sicos valiosos. Clau Health los puede integrar en su torre de control. Partner de datos ideal.</div>
+      </div>
+
+      <div class="startup-ally">
+        <h3>Rayen Salud</h3>
+        <div class="stand">Stand A2 &bull; Health IT</div>
+        <div class="desc">20 a&ntilde;os en salud digital en LATAM. Integran tecnolog&iacute;a, datos e IA para sistemas de salud p&uacute;blicos y privados.</div>
+        <div class="synergy"><strong>Sinergia:</strong> Plataforma establecida en salud p&uacute;blica LATAM. GoSafe podr&iacute;a integrarse como m&oacute;dulo preanest&eacute;sico dentro de su ecosistema.</div>
+      </div>
+
+      <div class="startup-ally">
+        <h3>Innmetec (INNM)</h3>
+        <div class="stand">Medical Devices</div>
+        <div class="desc">Revoluciona cirug&iacute;as complejas con implantes personalizados y PEEK+, biomaterial bioactivo para regeneraci&oacute;n &oacute;sea.</div>
+        <div class="synergy"><strong>Sinergia:</strong> Cirug&iacute;as complejas = pacientes de alto riesgo anest&eacute;sico. GoSafe optimiza justamente esa preparaci&oacute;n. Caso de uso conjunto poderoso.</div>
+      </div>
+
+      <div class="startup-ally">
+        <h3>Glya</h3>
+        <div class="stand">Health IT</div>
+        <div class="desc">Gesti&oacute;n y monitorizaci&oacute;n inteligente y remota de pacientes usando IA y IoT. Descubre, analiza, anticipa.</div>
+        <div class="synergy"><strong>Sinergia:</strong> Monitoreo remoto post-operatorio + preparaci&oacute;n pre-operatoria GoSafe = cobertura completa del journey quir&uacute;rgico.</div>
+      </div>
+
+      <div class="startup-ally">
+        <h3>Humanolab</h3>
+        <div class="stand">Digital Health</div>
+        <div class="desc">El sistema de salud predictivo para 650 millones de latinos.</div>
+        <div class="synergy"><strong>Sinergia:</strong> Salud predictiva a escala LATAM. GoSafe aporta predicci&oacute;n preanest&eacute;sica. Alianza para modelo predictivo integral.</div>
+      </div>
+
+      <div class="startup-ally">
+        <h3>Cielum Health</h3>
+        <div class="stand">Stand A15 &bull; Digital Health</div>
+        <div class="desc">Expertos en la continuidad del cuidado y la gesti&oacute;n farmac&eacute;utica con un ecosistema digital.</div>
+        <div class="synergy"><strong>Sinergia:</strong> Gesti&oacute;n farmac&eacute;utica + preparaci&oacute;n preanest&eacute;sica. GoSafe necesita validar medicamentos del paciente &mdash; Cielum tiene esa data.</div>
+      </div>
+
+      <div class="startup-ally">
+        <h3>IC Intelicare</h3>
+        <div class="stand">Telemedicine</div>
+        <div class="desc">Soluci&oacute;n de Telemedicina con tres plataformas: Teleconsulta, Telemonitoreo, Teleradiolog&iacute;a.</div>
+        <div class="synergy"><strong>Sinergia:</strong> Canal de teleconsulta para la valoraci&oacute;n preanest&eacute;sica remota de GoSafe. Partner de distribuci&oacute;n en telemedicina.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACCELERATORS FERIAL -->
+  <div class="section" id="accelerators">
+    <div class="section-header">
+      <div>
+        <h2>Aceleradoras &amp; programas &mdash; complemento GoSafe</h2>
+        <div class="section-subtitle">Mentor&iacute;a, pilotos, cr&eacute;ditos cloud/GPU y redes de inversi&oacute;n alineadas con healthtech + IA. Cruza con la categor&iacute;a <strong>Aceleradoras</strong> en Ferial-e (sesi&oacute;n iniciada).</div>
+      </div>
+      <span class="badge badge-med">ECOSISTEMA</span>
+    </div>
+
+    <div class="gosafe-summary" style="margin-bottom:20px;">
+      <h3>Fuente en Ferial-e</h3>
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.6;margin-top:8px;">
+        Cat&aacute;logo de aceleradoras en el asistente: <a class="card-link" href="https://app.ferial-e.com/#/as/assistant/69c93a05f79b486b413d73e0/category/69c93bb8f79b486b413d740b" target="_blank" rel="noopener">Ferial-e &mdash; categor&iacute;a Aceleradoras</a>. La app puede pedir <strong>Chrome, Firefox o Edge</strong> recientes si ves aviso de compatibilidad.
+      </p>
+    </div>
+
+    <div class="grid-3">
+      <div class="ally-card">
+        <h3>Inqlab</h3>
+        <div class="type">Aceleradora &mdash; Colombia</div>
+        <div class="desc">Early / seed con healthtech en radar recurrente. Contacto referencia en matriz inversionistas: <strong>Andr&eacute;s Fonnegra</strong> (Partner).</div>
+        <a class="card-link" href="https://www.inqlab.co/" target="_blank" rel="noopener">inqlab.co &rarr;</a>
+        <span class="value-tag partner" style="margin-top:10px;">MENTOR&Iacute;A + DEALFLOW</span>
+      </div>
+
+      <div class="ally-card">
+        <h3>Endeavor</h3>
+        <div class="type">Co-organizador Startco &mdash; Expert Meetings</div>
+        <div class="desc">Red global de alto impacto; acceso a mentores e inversores. Complementa narrativa de escala y gobernanza para GoSafe.</div>
+        <a class="card-link" href="https://endeavor.org/" target="_blank" rel="noopener">endeavor.org &rarr;</a>
+        <span class="value-tag ecosystem" style="margin-top:10px;">MENTORES + RED</span>
+      </div>
+
+      <div class="ally-card">
+        <h3>Ruta N</h3>
+        <div class="type">Sponsor Unicornio &mdash; Innovaci&oacute;n Medell&iacute;n</div>
+        <div class="desc">Facilita conexi&oacute;n con hospitales y cl&iacute;nicas de la ciudad; clave para <strong>pilotos</strong> y validaci&oacute;n perioperatoria regional.</div>
+        <a class="card-link" href="https://rutanmedellin.org/" target="_blank" rel="noopener">rutanmedellin.org &rarr;</a>
+        <span class="value-tag ecosystem" style="margin-top:10px;">PILOTOS</span>
+      </div>
+
+      <div class="ally-card">
+        <h3>NVIDIA Inception</h3>
+        <div class="type">Programa IA / GPU &mdash; Startco</div>
+        <div class="desc">Cr&eacute;ditos GPU, mentoring t&eacute;cnico y visibilidad para el motor de IA de GoSafe (triage / agentes).</div>
+        <a class="card-link" href="https://www.nvidia.com/en-us/deep-learning-ai/startups/" target="_blank" rel="noopener">NVIDIA Startups &rarr;</a>
+        <span class="value-tag partner" style="margin-top:10px;">IA + GPU</span>
+      </div>
+
+      <div class="ally-card">
+        <h3>AWS Activate</h3>
+        <div class="type">Sponsor Unicornio &mdash; Infra cloud</div>
+        <div class="desc">Cr&eacute;ditos y soporte para escalar backend y pipelines; alinea con equipo PhD IA y despliegue multi-IPS.</div>
+        <a class="card-link" href="https://aws.amazon.com/startups/" target="_blank" rel="noopener">aws.amazon.com/startups &rarr;</a>
+        <span class="value-tag partner" style="margin-top:10px;">INFRA</span>
+      </div>
+
+      <div class="ally-card">
+        <h3>Boostart</h3>
+        <div class="type">Venture Studio</div>
+        <div class="desc">Apoyo operativo y construcci&oacute;n de startup; &uacute;til si buscan <strong>playbooks</strong> de go-to-market o refuerzo de producto en etapa seed.</div>
+        <a class="card-link" href="https://www.boostart.vc/" target="_blank" rel="noopener">boostart.vc &rarr;</a>
+        <span class="value-tag ecosystem" style="margin-top:10px;">STUDIO</span>
+      </div>
+
+      <div class="ally-card">
+        <h3>UPVIEW Ventures</h3>
+        <div class="type">Venture Studio &mdash; IA / biotech</div>
+        <div class="desc">Studio con foco IA + biotech; puede aportar metodolog&iacute;a de experimentaci&oacute;n r&aacute;pida en producto data-heavy.</div>
+        <a class="card-link" href="https://upviewventures.com/" target="_blank" rel="noopener">upviewventures.com &rarr;</a>
+        <span class="value-tag partner" style="margin-top:10px;">IA + BIO</span>
+      </div>
+
+      <div class="ally-card">
+        <h3>Digital Hub Monterrey</h3>
+        <div class="type">Hub multicorporativo &mdash; IA</div>
+        <div class="desc">Conexi&oacute;n corporativa M&eacute;xico + tesis 100% IA; buen puente para expansi&oacute;n y <strong>co-innovaci&oacute;n</strong> fuera de Colombia.</div>
+        <a class="card-link" href="http://www.mtydigitalhub.com/" target="_blank" rel="noopener">mtydigitalhub.com &rarr;</a>
+        <span class="value-tag ecosystem" style="margin-top:10px;">CORP IA</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- OUTREACH FERIAL MAILERLITE -->
+  <div class="section" id="outreach">
+    <div class="section-header">
+      <div>
+        <h2>Outreach VCs &mdash; MailerLite + Ferial-e</h2>
+        <div class="section-subtitle">Correo de valor + CTA bajo (Calendly / Google Calendar) y enriquecimiento desde la app del evento.</div>
+      </div>
+    </div>
+
+    <div class="gosafe-summary" style="margin-bottom:20px;">
+      <h3>Enriquecimiento Ferial-e</h3>
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.6;margin-top:8px;">
+        <strong>VCs / inversionistas:</strong> <a class="card-link" href="https://app.ferial-e.com/#/as/assistant/69c93a05f79b486b413d73e0/category/69c93bb8f79b486b413d740e" target="_blank" rel="noopener">categor&iacute;a en Ferial-e</a>
+        &nbsp;&middot;&nbsp;
+        <strong>Aceleradoras:</strong> <a class="card-link" href="https://app.ferial-e.com/#/as/assistant/69c93a05f79b486b413d73e0/category/69c93bb8f79b486b413d740b" target="_blank" rel="noopener">categor&iacute;a Aceleradoras</a>
+        (misma sesi&oacute;n). Si aparece aviso de navegador, usa Chrome/Firefox/Edge recientes.
+      </p>
+    </div>
+
+    <div class="card" style="max-width:720px;margin-bottom:16px;">
+      <div class="card-top">
+        <div>
+          <h3>Railway &mdash; compartir con socios</h3>
+          <div class="stage">Docker + Node est&aacute;tico &mdash; sin API keys en el repo</div>
+        </div>
+        <span class="badge badge-corp">DEPLOY</span>
+      </div>
+      <div class="verticals" style="margin-top:12px;">
+        En la ra&iacute;z del repo: <code>Dockerfile</code>, <code>server.mjs</code>, <code>railway.toml</code>. El contenedor copia <code>GoSafe_Dashboard_Startco2026.html</code> a <code>public/index.html</code> y sirve en <code>PORT</code> (Railway lo inyecta).
+      </div>
+      <div class="reason" style="margin-top:14px;">
+        <strong>Railway:</strong> New project &rarr; Deploy from GitHub (o CLI) &rarr; root <code>Startco26</code> &rarr; generar dominio p&uacute;blico &rarr; compartir URL. Variables en Railway (no en el repo): <code>MAILERLITE_API_KEY</code> o <code>MAILES_API_KEY</code>, <code>CALENDLY_URL</code>, <code>OUTREACH_API_SECRET</code> (token que el equipo ingresa en el formulario para disparar correos), opcional <code>MAILERLITE_GROUP_NAME</code>.
+      </div>
+      <a class="card-link" href="https://railway.app/" target="_blank" rel="noopener">railway.app &rarr;</a>
+    </div>
+
+    <div class="card" style="max-width:720px;">
+      <div class="card-top">
+        <div>
+          <h3>MailerLite &mdash; flujo t&eacute;cnico</h3>
+          <div class="stage">API token en <code style="font-size:11px;color:var(--accent2);">.env</code> como <code style="font-size:11px;">MAILES_API_KEY</code> (o <code style="font-size:11px;">MAILERLITE_API_KEY</code>)</div>
+        </div>
+        <span class="badge badge-high">ENVIO</span>
+      </div>
+      <div class="verticals" style="margin-top:12px;">
+        <strong>Plantilla HTML:</strong> <code>gosafe_vc_outreach_email.html</code> (merge <code>{$name}</code> + enlace Calendly).<br />
+        <strong>Script:</strong> <code>send_gosafe_vc_outreach.py</code> crea/reutiliza el grupo <em>GoSafe VC Outreach (Startco 2026)</em>, da de alta al suscriptor, arma la campa&ntilde;a y programa env&iacute;o <em>instant</em>.<br />
+        <strong>Calendly:</strong> define <code>CALENDLY_URL</code> en <code>.env</code> con tu enlace p&uacute;blico (15 min).
+      </div>
+      <div class="reason" style="margin-top:14px;">
+        Prueba tipo VC: <code>/usr/bin/python3 send_gosafe_vc_outreach.py --email caromontefrio@gmail.com --name "Carolina"</code>
+        &mdash; <code>--dry-run</code> imprime el HTML sin llamar a la API.
+      </div>
+      <div class="reason" style="margin-top:10px;border-left-color:var(--accent3);">
+        Si la campa&ntilde;a queda en estado <strong>ready</strong> en el panel de MailerLite, revisa <strong>autenticaci&oacute;n de dominio</strong> y confirma el env&iacute;o manual si la cuenta lo pide. Panel: <a class="card-link" href="https://dashboard.mailerlite.com/" target="_blank" rel="noopener">dashboard.mailerlite.com</a>
+      </div>
+
+      <div class="reason" style="margin-top:16px;border-left-color:var(--accent);">
+        <strong>Enviar desde el sitio desplegado</strong> (mismo dominio Railway): el servidor expone <code>POST /api/send-outreach</code>. La API key de MailerLite <strong>nunca</strong> va al navegador; solo quien tenga el <code>OUTREACH_API_SECRET</code> configurado en Railway puede disparar.
+      </div>
+      <div style="margin-top:14px;display:grid;gap:10px;max-width:520px;">
+        <label style="font-size:11px;color:var(--text-muted);">Email del contacto</label>
+        <input id="ml-outreach-email" type="email" autocomplete="email" placeholder="vc@ejemplo.com" style="padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;" />
+        <label style="font-size:11px;color:var(--text-muted);">Nombre (merge MailerLite)</label>
+        <input id="ml-outreach-name" type="text" autocomplete="name" placeholder="Nombre" style="padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;" />
+        <label style="font-size:11px;color:var(--text-muted);">Asunto (opcional)</label>
+        <input id="ml-outreach-subject" type="text" value="GoSafe AI - healthtech pre-anestesico (Startco / 15 min si hay fit)" style="padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;" />
+        <label style="font-size:11px;color:var(--text-muted);">Token equipo (<code>OUTREACH_API_SECRET</code> en Railway)</label>
+        <input id="ml-outreach-secret" type="password" autocomplete="off" placeholder="Secreto compartido" style="padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;" />
+        <button type="button" onclick="window.submitGoSafeOutreach && window.submitGoSafeOutreach()" style="margin-top:6px;padding:10px 16px;border-radius:8px;border:none;background:var(--accent);color:#111;font-weight:800;font-size:13px;cursor:pointer;">Enviar correo MailerLite</button>
+        <div id="ml-outreach-status" style="font-size:12px;color:var(--text-muted);min-height:18px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MATRIX -->
+  <div class="section" id="matrix">
+    <div class="section-header">
+      <div>
+        <h2>Matriz Completa de Oportunidades</h2>
+        <div class="section-subtitle">Resumen ejecutivo de todos los fondos del directorio Startco y su relevancia para GoSafe.</div>
+      </div>
+    </div>
+
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>Fondo / Entidad</th>
+          <th>Stage</th>
+          <th>Fit GoSafe</th>
+          <th>Prioridad</th>
+          <th>Raz&oacute;n</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>EWA Capital</strong></td><td>Pre-seed &ndash; Series A</td><td>Salud directo</td><td><span class="badge badge-high">ALTA</span></td><td>Vertical salud expl&iacute;cita</td></tr>
+        <tr><td><strong>Capria</strong></td><td>Seed / Series A+</td><td>Healthtech + IA</td><td><span class="badge badge-high">ALTA</span></td><td>Doble fit: health + IA aplicada</td></tr>
+        <tr><td><strong>M Capital</strong></td><td>Preseed / Seed</td><td>Health/BioTech + AI</td><td><span class="badge badge-high">ALTA</span></td><td>IA + Health + Colombia</td></tr>
+        <tr><td><strong>IGNIA Partners</strong></td><td>Temprana &ndash; Growth</td><td>Healthtech</td><td><span class="badge badge-high">ALTA</span></td><td>Healthtech + multi-stage</td></tr>
+        <tr><td><strong>Krealo</strong></td><td>Seed / Serie A</td><td>Healthtech + B2B</td><td><span class="badge badge-high">ALTA</span></td><td>Brazo Credicorp, LATAM health</td></tr>
+        <tr><td><strong>Latin Leap</strong></td><td>Seed / Early</td><td>Healthtech</td><td><span class="badge badge-high">ALTA</span></td><td>Seed health LATAM</td></tr>
+        <tr><td><strong>BID LAB</strong></td><td>Fondos + directo</td><td>Salud/Biotech</td><td><span class="badge badge-high">ALTA</span></td><td>Institucional + credibilidad</td></tr>
+        <tr><td><strong>Alive Ventures</strong></td><td>Colombia / Per&uacute;</td><td>Healthtech</td><td><span class="badge badge-high">ALTA</span></td><td>Health + impacto + Colombia</td></tr>
+        <tr><td><strong>Cube Ventures</strong></td><td>Pre-seed / Seed</td><td>Healthtech</td><td><span class="badge badge-high">ALTA</span></td><td>Health + infra tech</td></tr>
+        <tr><td><strong>New Ventures</strong></td><td>Early / Seed</td><td>Salud + impacto</td><td><span class="badge badge-high">ALTA</span></td><td>Salud + impacto social</td></tr>
+        <tr><td><strong>Simma Capital</strong></td><td>Pre-seed / Seed</td><td>Healthtech</td><td><span class="badge badge-high">ALTA</span></td><td>Software health SaaS</td></tr>
+        <tr><td><strong>Lotux VC</strong></td><td>Preseed</td><td>Health</td><td><span class="badge badge-high">ALTA</span></td><td>Health + ticket co-inversi&oacute;n</td></tr>
+        <tr><td><strong>Corteza Capital</strong></td><td>Pre-seed &ndash; Serie A</td><td>AI</td><td><span class="badge badge-high">ALTA</span></td><td>IA como core thesis</td></tr>
+        <tr><td><strong>Caribe Ventures</strong></td><td>Micro (2do sem 2026)</td><td>AI pre-seed</td><td><span class="badge badge-high">ALTA</span></td><td>100% AI, sembrar relaci&oacute;n</td></tr>
+        <tr><td><strong>Bancolombia V.</strong></td><td>CVC</td><td>Estrat&eacute;gico</td><td><span class="badge badge-corp">ESTRAT.</span></td><td>Distribuci&oacute;n + capital</td></tr>
+        <tr><td><strong>EPM Ventures</strong></td><td>CVC ($150MM)</td><td>Ciudades inteligentes</td><td><span class="badge badge-corp">ESTRAT.</span></td><td>Infra salud Medell&iacute;n</td></tr>
+        <tr><td><strong>Winter Kpital</strong></td><td>Pre-seed &ndash; Growth</td><td>SaaS + AI</td><td><span class="badge badge-med">MEDIA</span></td><td>IA enterprise SaaS</td></tr>
+        <tr><td><strong>MrPink VC</strong></td><td>Seed / Early</td><td>Agn&oacute;stico</td><td><span class="badge badge-med">MEDIA</span></td><td>Tracci&oacute;n es el pitch</td></tr>
+        <tr><td><strong>Angel Hub</strong></td><td>Seed</td><td>Agn&oacute;stico</td><td><span class="badge badge-med">MEDIA</span></td><td>Red &aacute;ngeles M&eacute;xico</td></tr>
+        <tr><td><strong>UPVIEW</strong></td><td>Pre-seed / Seed</td><td>IA + Biotech</td><td><span class="badge badge-med">MEDIA</span></td><td>Venture studio IA</td></tr>
+        <tr><td><strong>Digital Hub MTY</strong></td><td>Seed / Pre-A</td><td>IA</td><td><span class="badge badge-med">MEDIA</span></td><td>Multicorp IA, M&eacute;xico</td></tr>
+        <tr><td><strong>Inqlab</strong></td><td>Early / Seed</td><td>Healthtech recurrente</td><td><span class="badge badge-med">MEDIA</span></td><td>Aceleradora CO health</td></tr>
+        <tr><td><strong>30N Ventures</strong></td><td>Pre-seed / Seed</td><td>SaaS</td><td><span class="badge badge-med">MEDIA</span></td><td>SaaS B2B angle</td></tr>
+        <tr><td><strong>B Venture</strong></td><td>Pre-seed / Seed</td><td>SaaS agn&oacute;stico</td><td><span class="badge badge-med">MEDIA</span></td><td>Completar ronda</td></tr>
+        <tr><td><strong>JP Morgan</strong></td><td>Banca global</td><td>Legitimador</td><td><span class="badge badge-low">BAJA</span></td><td>Rondas futuras</td></tr>
+        <tr><td><strong>Mundi Ventures</strong></td><td>Pre-seed &ndash; B</td><td>Insurtech</td><td><span class="badge badge-low">BAJA</span></td><td>Insurtech &ne; healthtech directo</td></tr>
+        <tr><td><strong>Viwala</strong></td><td>Pre-seed / Seed</td><td>Impacto</td><td><span class="badge badge-low">BAJA</span></td><td>Debt / impacto financiero</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+window.submitGoSafeOutreach = async function () {
+  var statusEl = document.getElementById('ml-outreach-status');
+  if (!statusEl) return;
+  statusEl.textContent = '';
+  var email = (document.getElementById('ml-outreach-email') || {}).value || '';
+  var name = (document.getElementById('ml-outreach-name') || {}).value || '';
+  var subject = (document.getElementById('ml-outreach-subject') || {}).value || '';
+  var secret = (document.getElementById('ml-outreach-secret') || {}).value || '';
+  if (!email.trim()) { statusEl.textContent = 'Indica un email.'; return; }
+  if (!secret.trim()) { statusEl.textContent = 'Indica el token equipo (OUTREACH_API_SECRET).'; return; }
+  statusEl.textContent = 'Enviando...';
+  try {
+    var res = await fetch('/api/send-outreach', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.trim(), name: name.trim() || 'Contacto', subject: subject.trim(), secret: secret.trim() })
+    });
+    var data = {};
+    try { data = await res.json(); } catch (e) { data = {}; }
+    if (res.ok && data.ok) {
+      statusEl.style.color = 'var(--accent2)';
+      statusEl.textContent = 'Listo. Campa\u00f1a ' + (data.campaignId || '') + ' programada. Revisa MailerLite si queda en ready.';
+    } else {
+      statusEl.style.color = 'var(--red)';
+      statusEl.textContent = (data && data.message) ? data.message : ((data && data.error) ? data.error : ('Error ' + res.status));
+    }
+  } catch (err) {
+    statusEl.style.color = 'var(--red)';
+    statusEl.textContent = 'No se pudo conectar al servidor (solo funciona en el sitio desplegado con API activa).';
+  }
+};
+</script>
+
+</body>
+</html>

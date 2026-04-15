@@ -1,0 +1,10 @@
+# Railway: New Project -> Deploy repo -> generate domain -> share URL with partners.
+# No env vars required for the static dashboard. Do not bake .env into the image.
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
