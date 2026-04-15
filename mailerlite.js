@@ -80,6 +80,7 @@ export async function upsertSubscriber(token, email, name, groupId) {
       email: email.trim(),
       fields: { name: name.trim() },
       groups: [groupId],
+      resubscribe: true,
     }),
   });
 }

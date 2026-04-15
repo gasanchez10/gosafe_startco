@@ -109,6 +109,7 @@ def upsert_subscriber(token: str, email: str, name: str, group_id: str) -> None:
         "email": email,
         "fields": {"name": name},
         "groups": [group_id],
+        "resubscribe": True,
     }
     code, data = api_request("POST", "/subscribers", token, payload)
     if code not in (200, 201):
