@@ -25,6 +25,35 @@ const GROUP_NAME =
   process.env.MAILERLITE_GROUP_NAME?.trim() ||
   "GoSafe VC Outreach (Startco 2026)";
 
+function calendlyBaseForPreview() {
+  const u = process.env.CALENDLY_URL?.trim() || "";
+  if (u.startsWith("http://") || u.startsWith("https://")) return u;
+  return "https://calendly.com/";
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function buildEmailPreviewHtml(reqUrl) {
+  let u;
+  try {
+    u = new URL(reqUrl || "/", "http://local.preview");
+  } catch {
+    u = new URL("http://local.preview/email-preview");
+  }
+  const displayName = (u.searchParams.get("name") || "Carolina").slice(0, 120);
+  let html = buildOutreachHtml(TEMPLATE, calendlyBaseForPreview());
+  html = html.replace(/\{\$name\}/g, escapeHtml(displayName));
+  const strip = `<div style="font-family:system-ui,sans-serif;background:#1a1a28;color:#c8ff00;padding:10px 14px;text-align:center;font-size:12px;border-bottom:1px solid #333;">Vista previa (no env&iacute;a MailerLite). Saludo: <strong>${escapeHtml(displayName)}</strong> &mdash; prob&aacute; <code>?name=Tu+nombre</code> en la URL.</div>`;
+  html = html.replace(/<body([^>]*)>/i, `<body$1>${strip}`);
+  return html;
+}
+
 const MIME = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
@@ -216,6 +245,20 @@ const server = http.createServer(async (req, res) => {
   const pathname = (req.url || "/").split("?")[0];
   if (pathname === "/api/send-outreach") {
     await handleSendOutreach(req, res);
+    return;
+  }
+  if (pathname === "/email-preview" && req.method === "GET") {
+    try {
+      const html = buildEmailPreviewHtml(req.url || "/email-preview");
+      res.writeHead(200, {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "no-store",
+      });
+      res.end(html);
+    } catch (e) {
+      res.writeHead(500);
+      res.end("Preview error");
+    }
     return;
   }
 
