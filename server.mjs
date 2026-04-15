@@ -27,7 +27,7 @@ const GROUP_NAME =
   "GoSafe VC Outreach (Startco 2026)";
 
 const MSG_MISSING_OUTREACH_SECRET =
-  "El proceso Node no ve la variable OUTREACH_API_SECRET (no está definida en este servicio). Revisa: (1) el nombre exacto OUTREACH_API_SECRET; (2) la variable está en el mismo servicio de Railway que despliega este contenedor (si tienes varios servicios, cada uno tiene sus variables); (3) Redeploy después de guardar. Diagnóstico: abre en el navegador /api/outreach-status en este mismo dominio.";
+  "El proceso Node no ve OUTREACH_API_SECRET ni MAILES_API_KEY. En Railway: las variables deben estar en la pestaña Variables del MISMO servicio que ejecuta este contenedor. Si las creaste en Project Settings → Shared Variables, NO entran solas: en el servicio → Variables → «Shared Variable» (o añade OUTREACH_API_SECRET=${{shared.OUTREACH_API_SECRET}}). Tras editar variables, Railway puede dejar «cambios pendientes»: revísalos y despliégalos; luego redeploy del servicio. /api/outreach-status";
 const MSG_EMPTY_OUTREACH_SECRET =
   "OUTREACH_API_SECRET existe pero el valor está vacío o solo espacios. En Railway edita la variable: pega el secreto sin comillas ni saltos de línea al inicio/final. Redeploy. Diagnóstico: /api/outreach-status.";
 const MSG_FORBIDDEN_SECRET =
@@ -469,7 +469,7 @@ function handleOutreachStatusGet(req, res) {
   let message = "";
   if (sec.state === "missing") {
     message =
-      "Variable OUTREACH_API_SECRET no definida en este proceso Node (revisa Railway: servicio correcto, nombre exacto, redeploy).";
+      "OUTREACH_API_SECRET y/o MailerLite no llegan a este servicio. Si usaste Shared Variables del proyecto, enlázalas al servicio (Variables del servicio → Shared Variable o ${{shared.NOMBRE}}). Confirma también el deploy de «staged changes» de variables y redeploy.";
   } else if (sec.state === "empty") {
     message =
       "OUTREACH_API_SECRET existe pero el valor está vacío o solo espacios; edita el valor en Railway.";
