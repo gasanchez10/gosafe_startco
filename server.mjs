@@ -462,6 +462,10 @@ function handleOutreachStatusGet(req, res) {
   }
   const sec = getOutreachSecretFromEnv();
   const ml = !!getMailerLiteToken();
+  const onRailway =
+    process.env.RAILWAY_ENVIRONMENT != null ||
+    process.env.RAILWAY_PROJECT_ID != null ||
+    process.env.RAILWAY_SERVICE_ID != null;
   let message = "";
   if (sec.state === "missing") {
     message =
@@ -474,6 +478,8 @@ function handleOutreachStatusGet(req, res) {
   }
   json(res, 200, {
     ok: true,
+    /** Si false, suele ser servidor local sin --env-file=.env o no es el contenedor de Railway. */
+    railwayRuntimeDetected: onRailway,
     outreachSecret: sec.state,
     mailerliteKey: ml ? "ok" : "missing",
     message,
