@@ -39,15 +39,23 @@ function escapeHtml(s) {
     .replace(/"/g, "&quot;");
 }
 
-function buildEmailPreviewHtml(reqUrl) {
+function buildEmailPreviewHtml(req) {
+  const reqUrl = req.url || "/email-preview";
   let u;
   try {
-    u = new URL(reqUrl || "/", "http://local.preview");
+    u = new URL(reqUrl, "http://local.preview");
   } catch {
     u = new URL("http://local.preview/email-preview");
   }
   const displayName = (u.searchParams.get("name") || "Carolina").slice(0, 120);
-  let html = buildOutreachHtml(TEMPLATE, calendlyBaseForPreview());
+  const xfProto = req.headers["x-forwarded-proto"];
+  const proto =
+    typeof xfProto === "string" && xfProto.trim()
+      ? xfProto.split(",")[0].trim()
+      : "http";
+  const host = (req.headers.host || "127.0.0.1:8080").trim();
+  const publicBase = `${proto}://${host}`;
+  let html = buildOutreachHtml(TEMPLATE, calendlyBaseForPreview(), publicBase);
   html = html.replace(/\{\$name\}/g, escapeHtml(displayName));
   const strip = `<div style="font-family:system-ui,sans-serif;background:#1a1a28;color:#c8ff00;padding:10px 14px;text-align:center;font-size:12px;border-bottom:1px solid #333;">Vista previa (no env&iacute;a MailerLite). Saludo: <strong>${escapeHtml(displayName)}</strong> &mdash; prob&aacute; <code>?name=Tu+nombre</code> en la URL.</div>`;
   html = html.replace(/<body([^>]*)>/i, `<body$1>${strip}`);
@@ -195,7 +203,8 @@ async function handleSendOutreach(req, res) {
 
   try {
     const calendly = process.env.CALENDLY_URL || "https://calendly.com/";
-    const html = buildOutreachHtml(TEMPLATE, calendly);
+    const publicBase = process.env.PUBLIC_BASE_URL?.trim() || "";
+    const html = buildOutreachHtml(TEMPLATE, calendly, publicBase);
     const groupId = await ensureGroup(mlToken, GROUP_NAME);
     await upsertSubscriber(mlToken, email, name, groupId);
     let fromEmail = process.env.MAILERLITE_FROM_EMAIL?.trim() || "";
@@ -249,7 +258,7 @@ const server = http.createServer(async (req, res) => {
   }
   if (pathname === "/email-preview" && req.method === "GET") {
     try {
-      const html = buildEmailPreviewHtml(req.url || "/email-preview");
+      const html = buildEmailPreviewHtml(req);
       res.writeHead(200, {
         "Content-Type": "text/html; charset=utf-8",
         "Cache-Control": "no-store",

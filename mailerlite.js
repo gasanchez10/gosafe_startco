@@ -3,6 +3,7 @@
  */
 
 import fs from "node:fs";
+import path from "node:path";
 
 const BASE = "https://connect.mailerlite.com/api";
 
@@ -114,8 +115,32 @@ export async function scheduleCampaignInstant(token, campaignId) {
   });
 }
 
-export function buildOutreachHtml(templatePath, calendlyUrl) {
+function resolveLogoSrc(templatePath, publicBaseUrl) {
+  const pub = (publicBaseUrl || "").trim().replace(/\/+$/, "");
+  if (pub) {
+    return `${pub}/go-safe-logo.png`;
+  }
+  const dir = path.dirname(templatePath);
+  const candidates = [
+    path.join(dir, "go-safe-logo.png"),
+    path.join(dir, "Go Safe Logo.png"),
+  ];
+  for (const p of candidates) {
+    if (fs.existsSync(p)) {
+      const b64 = fs.readFileSync(p).toString("base64");
+      return `data:image/png;base64,${b64}`;
+    }
+  }
+  return "";
+}
+
+export function buildOutreachHtml(templatePath, calendlyUrl, publicBaseUrl = "") {
   const raw = fs.readFileSync(templatePath, "utf8");
-  const base = (calendlyUrl || "https://calendly.com/").trim().replace(/\/+$/, "");
-  return raw.replace(/__CALENDLY_URL__/g, `${base}/`);
+  const cal = (calendlyUrl || "https://calendly.com/").trim().replace(/\/+$/, "");
+  let html = raw.replace(/__CALENDLY_URL__/g, `${cal}/`);
+  const logoSrc = resolveLogoSrc(templatePath, publicBaseUrl);
+  const logoFallback =
+    "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+  html = html.replace(/__LOGO_SRC__/g, logoSrc || logoFallback);
+  return html;
 }
