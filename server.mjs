@@ -48,13 +48,8 @@ function buildEmailPreviewHtml(req) {
     u = new URL("http://local.preview/email-preview");
   }
   const displayName = (u.searchParams.get("name") || "Carolina").slice(0, 120);
-  const xfProto = req.headers["x-forwarded-proto"];
-  const proto =
-    typeof xfProto === "string" && xfProto.trim()
-      ? xfProto.split(",")[0].trim()
-      : "http";
-  const host = (req.headers.host || "127.0.0.1:8080").trim();
-  const publicBase = `${proto}://${host}`;
+  /** Igual que el envío: sin PUBLIC_BASE_URL el logo es jsDelivr (no forzar host local, Gmail no usa base64). */
+  const publicBase = process.env.PUBLIC_BASE_URL?.trim() || "";
   let html = buildOutreachHtml(TEMPLATE, calendlyBaseForPreview(), publicBase);
   html = html.replace(/\{\$name\}/g, escapeHtml(displayName));
   const strip = `<div style="font-family:system-ui,sans-serif;background:#1a1a28;color:#c8ff00;padding:10px 14px;text-align:center;font-size:12px;border-bottom:1px solid #333;">Vista previa (no env&iacute;a MailerLite). Saludo: <strong>${escapeHtml(displayName)}</strong> &mdash; prob&aacute; <code>?name=Tu+nombre</code> en la URL.</div>`;
